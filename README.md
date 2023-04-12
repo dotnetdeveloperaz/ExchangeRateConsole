@@ -6,7 +6,14 @@
 
 ## Status
 
-[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml)
+.NET 6
+[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet6.yml)
+
+.NET 7
+[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet7.yml)
+
+.NET 8 Preview
+[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet8.yml)
 
 ## Table of Contents
 - [About](#about)
