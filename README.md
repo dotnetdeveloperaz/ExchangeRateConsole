@@ -32,7 +32,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-- .Net 6
+- .NET 6, 7, or 8 preview
 - MySqlConnector
 - Account with <a target="_blank" href="https://openexchangerates.org/api/">Open Exchange Rates</a> (Free accounts with 1,000 calls per month available)
 - MariaDB (or MySql) and Exchange Rate table for storing exchange rates.
