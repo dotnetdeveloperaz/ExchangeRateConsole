@@ -12,7 +12,7 @@ class Title
         titleTable.AddColumn(
             new TableColumn(
                 new Markup(
-                    "[blue bold]Exchange :chart_increasing: Rate Console[/] v2.0\r\n[green bold italic]Copyright © 2023 Scott Glasgow[/]"
+                    $"[blue bold]Exchange :chart_increasing: Rate Console[/] v{Configure.Version}\r\n[green bold italic]Copyright © 2023 Scott Glasgow[/]"
                 )
             ).Centered()
         );
