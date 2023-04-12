@@ -7,7 +7,6 @@
 ## Status
 
 .NET 6
-
 [![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet6.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet6.yml)
 
 .NET 7
