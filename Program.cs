@@ -31,6 +31,7 @@ class Program
         }
         catch (Exception ex)
         {
+            logger.Error($"Spectre.Console.App.RunAsync threw an error. {ex.Message}");
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             return;
         }
