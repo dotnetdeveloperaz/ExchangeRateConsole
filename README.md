@@ -7,13 +7,13 @@
 ## Status
 
 .NET 6
-[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet6.yml)
+[![Exchange Rate Console .NET 6 Build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet.yml/badge.svg)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet6.yml)
 
 .NET 7
-[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet7.yml)
+[![Exchange Rate Console .NET 7 Build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet.yml/badge.svg)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet7.yml)
 
 .NET 8 Preview
-[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsole/actions/workflows/dotnet8.yml)
+[![Exchange Rate Console .NET 8 Build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet.yml/badge.svg)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml)
 
 ## Table of Contents
 - [About](#about)
