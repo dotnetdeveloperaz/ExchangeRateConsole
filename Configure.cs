@@ -3,8 +3,11 @@ using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole;
 
-class Configure
+public class Configure
 {
+    private static Configuration _configuration;
+    public static Configuration Configuration { get { return _configuration; } }
+
     public static Configuration Load(Configuration configuration)
     {
         var config = new ConfigurationBuilder()
@@ -25,6 +28,7 @@ class Configure
         configuration.Latest = config.GetSection("Latest").Value;
         configuration.Usage = config.GetSection("Usage").Value;
         configuration.BaseSymbol = config.GetSection("BaseSymbol").Value;
+        _configuration = configuration;
         return configuration;
     }
 }
