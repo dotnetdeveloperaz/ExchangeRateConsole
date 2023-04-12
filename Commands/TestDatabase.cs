@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using MySqlConnector;
 
 namespace ExchangeRateConsole.Commands;
 
@@ -25,10 +26,56 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
 
     public override int Execute(CommandContext context, Settings settings)
     {
-        settings.DoTestDatabase = true;
-        AnsiConsole.Write(new Markup(
-            $"[red bold]Executed TestDatabase[/] Execute? {settings.DoTestDatabase} Debug: {settings.Debug} Hidden: {settings.ShowHidden}"
-            ));
+        var titleTable = new Table().Centered();
+        // Borders
+        titleTable.BorderColor(Color.Blue);
+        titleTable.MinimalBorder();
+        titleTable.SimpleBorder();
+        titleTable.AddColumn(
+            new TableColumn(
+                new Markup(
+                    "[yellow bold]Running Database Connection Configuration Test[/]"
+                ).Centered()
+            )
+        );
+        titleTable.BorderColor(Color.Blue);
+        titleTable.Border(TableBorder.Rounded);
+        titleTable.Expand();
+        // Animate
+        AnsiConsole
+            .Live(titleTable)
+            .AutoClear(false)
+            .Overflow(VerticalOverflow.Ellipsis)
+            .Cropping(VerticalOverflowCropping.Top)
+            .Start(ctx =>
+            {
+                void Update(int delay, Action action)
+                {
+                    action();
+                    ctx.Refresh();
+                    Thread.Sleep(delay);
+                }
+
+                settings.DoTestDatabase = true;
+                Update(70, () =>
+                    titleTable.AddRow(
+                        $":hourglass_not_done:[red bold] Testing Connection...[/]"));
+                var conn = new MySqlConnection(Configure.Configuration.DefaultDB);
+                try
+                {
+                    conn.Open();
+                }
+                catch(Exception ex)
+                {
+                Update(70, () =>
+                            titleTable.AddRow(
+                                $"[red bold]Error Connecting to Database: {ex.Message}"));
+                }
+                conn.Close();
+                Update(70, () =>
+                            titleTable.AddRow(
+                                ":check_mark:[green bold] Connection Successful[/]"));
+            });
         return 0;
     }
 }
