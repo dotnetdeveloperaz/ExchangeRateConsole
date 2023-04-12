@@ -7,6 +7,7 @@
 ## Status
 
 .NET 6
+
 [![Exchange Rate Console .NET 6 Build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet6.yml)
 
 .NET 7
