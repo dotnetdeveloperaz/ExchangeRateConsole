@@ -15,6 +15,9 @@ class Program
         var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder
+                .AddConsole();
+                .AddDebug()
+                .SetMinimumLevel(LogLevel.Debug)
                 .AddFilter("Microsoft", LogLevel.Warning)
                 .AddFilter("System", LogLevel.Warning)
                 .AddFilter("ExchangeRateConsole.Program", LogLevel.Debug);
@@ -31,7 +34,7 @@ class Program
         }
         catch (Exception ex)
         {
-            logger.Error($"Spectre.Console.App.RunAsync threw an error. {ex.Message}");
+            logger.LogError($"Spectre.Console.App.RunAsync threw an error. {ex.Message}");
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
             return;
         }
