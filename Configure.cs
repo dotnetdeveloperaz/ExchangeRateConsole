@@ -14,15 +14,13 @@ public class Configure
         var config = new ConfigurationBuilder()
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("appsettings.json")
-            .AddUserSecrets<Program>()
+            .AddUserSecrets("b378d9cd-2817-4513-a75f-1e91724e3131")
             .Build();
-
-        // Need to change this to pull from ConnectionStrings
+        var secret = config["DefaultDB"];
         if (config.GetSection("DefaultDB").Value != "")
             configuration.DefaultDB = config.GetSection("DefaultDB").Value;
         if (config.GetSection("AppId").Value != "")
-            configuration.AppId = config.GetSection("AppId").Value;
-
+            configuration.AppId = "?app_id=" + config.GetSection("AppId").Value;
         configuration.BaseURL = config.GetSection("BaseURL").Value;
         configuration.DefaultSymbols = config.GetSection("DefaultSymbols").Value;
         configuration.History = config.GetSection("History").Value;
