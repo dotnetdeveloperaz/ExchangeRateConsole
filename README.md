@@ -1,6 +1,6 @@
 <h3 align="center">Exchange Rate Console</h3>
 
-<p>Console to retrieve currency exchange rates. Currently only support base USD and TRY/EUR rates are the defaults. Has built-in support to pass in any base currency and rate currency symbols.
+<p>Console to retrieve currency exchange rates. Currently only support base USD to convert from with a free account. Has built-in support to pass in any base currency (if you sign up for a plan that supports it) and rate currency symbols. If no symbols are specified, it will return all currency rates against the USD (or the specified base current).
     <br> 
 </p>
 
