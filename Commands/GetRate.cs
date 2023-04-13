@@ -1,12 +1,14 @@
 using System;
 using System.ComponentModel;
+using System.Reflection;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using Newtonsoft.Json;
+using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole.Commands;
 
-public class GetRateCommand : Command<HGetRateCommand.Settings>
+public class GetRateCommand : Command<GetRateCommand.Settings>
 {
     public class Settings : CommandSettings
     {
@@ -23,15 +25,14 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
         [DefaultValue("USD")]
         public string BaseSymbol { get; set; }
 
+        [CommandOption("--symbols <EUR>")]
+        [Description("Exchange Rate(s) To Get")]
+        public string Symbols { get; set; }
+
         [CommandOption("--save")]
         [Description("Save Results")]
         [DefaultValue(false)]
         public bool Save { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Displays Fake Data Instead Of Calling WebAPI")]
-        [DefaultValue(false)]
-        public bool IsFake { get; set; }
 
         [CommandOption("--json")]
         [Description("Display The Raw JSON Response")]
@@ -59,23 +60,32 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
         settings.GetRate = true;
         if (settings.Date == null)
             settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
-        AnsiConsole.Write(
-            new Markup(
-                $"[red bold]Executed History[/] Execute? {settings.GetRate} Date: {settings.Date} Base: {settings.BaseSymbol} Save: {settings.Save} Debug: {settings.Debug} Hidden: {settings.ShowHidden}"
-            )
-        );
+        var url =
+            Configure.Configuration.BaseURL
+            + Configure.Configuration.Latest
+            + Configure.Configuration.AppId
+            + "&symbols="
+            + settings.Symbols
+            + "&base="
+            + settings.BaseSymbol;
+        var client = new HttpClient();
+        var response = client.GetAsync(url).GetAwaiter().GetResult();
+        var results = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
         titleTable.MinimalBorder();
         titleTable.SimpleBorder();
         titleTable.AddColumn(
-            new TableColumn(new Markup("[yellow bold]Retrieving Account Information[/]").Centered())
+            new TableColumn(
+                new Markup(
+                    $"[yellow bold]Retrieving Exchange Rates For {settings.Symbols}[/]"
+                ).Centered()
+            )
         );
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
-//        Exchange exchange;
         // Animate
         AnsiConsole
             .Live(titleTable)
@@ -90,18 +100,24 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
+                var url =
+                    Configure.Configuration.BaseURL
+                    + Configure.Configuration.Latest
+                    + Configure.Configuration.AppId
+                    + "&symbols="
+                    + settings.Symbols
+                    + "&base="
+                    + settings.BaseSymbol;
                 Update(
                     70,
-                    () =>
-                        titleTable.AddRow(
-                            $":hourglass_not_done:[red bold] Calling API To Get Account Details...[/]"
-                        )
+                    () => titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
                 );
-/*                var client = new HttpClient();
+                var client = new HttpClient();
                 var response = client
                     .GetAsync(
                         Configure.Configuration.BaseURL
-                            + Configure.Configuration.History
+                            + Configure.Configuration.Latest
+                            + settings.Symbols
                             + Configure.Configuration.AppId
                     )
                     .GetAwaiter()
@@ -111,7 +127,7 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
                 {
                     Update(70, () => titleTable.AddRow($"[red]Data: {info}[/]"));
                 }
-*/                if (settings.Debug)
+                if (settings.Debug)
                 {
                     if (settings.ShowHidden)
                     {
@@ -174,10 +190,7 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
                     );
                     Update(
                         70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Debug: [/][blue]{settings.Debug}[/]"
-                            )
+                        () => titleTable.AddRow($"[red bold]Debug: [/][blue]{settings.Debug}[/]")
                     );
                     Update(
                         70,
@@ -188,10 +201,7 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
                     );
                     Update(
                         70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Save: [/][blue]{settings.Save}[/]"
-                            )
+                        () => titleTable.AddRow($"[red bold]Save: [/][blue]{settings.Save}[/]")
                     );
                     Update(
                         70,
@@ -204,89 +214,49 @@ public class GetRateCommand : Command<HGetRateCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Fake: [/][blue]{settings.IsFake}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
                                 $"[red bold]Show Json: [/][blue]{settings.DisplayJson}[/]"
                             )
                     );
                     Update(
                         70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Pretty: [/][blue]{settings.Pretty}[/]"
-                            )
+                        () => titleTable.AddRow($"[red bold]Pretty: [/][blue]{settings.Pretty}[/]")
                     );
                 }
-/*               account = JsonConvert.DeserializeObject<Account>(info);
-                var data = account.data;
-                var plan = data.plan;
-                var usage = data.usage;
-                var features = plan.features;
+                var exchange = JsonConvert.DeserializeObject<Exchange>(info);
+                var rates = exchange.rates;
                 Update(
                     70,
-                    () =>
-                        titleTable.AddRow(
-                            $":check_mark:[green bold] Retrieved Account Details...[/]"
-                        )
+                    () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s)...[/]")
                 );
-                Update(70, () => titleTable.AddRow($"[yellow bold]    Plan: {plan.name}[/]"));
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow(
-                            $"[yellow bold]    Specify Base Symbols: {features.@base}[/]"
-                        )
-                );
-                Update(
-                    70,
-                    () => titleTable.AddRow($"[yellow bold]    Symbols: {features.symbols}[/]")
-                );
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow($"[yellow bold]    TimeSeries: {features.TimeSeries}[/]")
-                );
-                Update(
-                    70,
-                    () => titleTable.AddRow($"[yellow bold]    Convert: {features.convert}[/]")
-                );
-                Update(70, () => titleTable.AddRow($"[yellow bold]    Quota: {plan.quota}[/]"));
-                Update(
-                    70,
-                    () => titleTable.AddRow($"[yellow bold]    Requests Made: {usage.requests}[/]")
-                );
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow(
-                            $"[yellow bold]    Remaining: {usage.requests_remaining}[/]"
-                        )
-                );
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow($"[yellow bold]    Days Elapsed: {usage.days_elapsed}[/]")
-                );
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow(
-                            $"[yellow bold]    Days Remaining: {usage.days_remaining}[/]"
-                        )
-                );
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow(
-                            $"[yellow bold]    Daily Average: {usage.daily_average}[/]"
-                        )
-                );
-*/            });
+
+                foreach (PropertyInfo prop in rates.GetType().GetProperties())
+                {
+                    if (prop.GetValue(rates).ToString() != "0")
+                    {
+                        if (settings.Save)
+                        {
+                            Update(
+                                70,
+                                () =>
+                                    titleTable.AddRow(
+                                        $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                                    )
+                            );
+                            //                            await SaveAsync(prop.Name, double.Parse(prop.GetValue(rates).ToString()), exchangeRate.RateDate.ToString("yyyy-MM-dd"));
+                        }
+                        else
+                        {
+                            Update(
+                                70,
+                                () =>
+                                    titleTable.AddRow(
+                                        $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                                    )
+                            );
+                        }
+                    }
+                }
+            });
         return 0;
     }
 }
