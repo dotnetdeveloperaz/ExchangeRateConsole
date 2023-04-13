@@ -94,9 +94,6 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     {
                         Update(70, () =>
                             titleTable.AddRow(
-                                $"[red bold]Calling WebAPI URL: [/][blue]{Configure.Configuration.BaseURL}[/]"));
-                        Update(70, () =>
-                            titleTable.AddRow(
                                 $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=","")}[/]"));
                         Update(70, () =>
                             titleTable.AddRow(
