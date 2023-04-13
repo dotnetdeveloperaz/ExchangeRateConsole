@@ -30,6 +30,8 @@ public class CommandApplication
                         "YYYY-MM-DD",
                         "--end",
                         "YYYY-MM-DD",
+                        "--symbols",
+                        "EUR,TRY",
                         "--json", 
                         "--pretty", 
                         "--debug",
@@ -38,12 +40,12 @@ public class CommandApplication
                 );
 
             config
-                .AddCommand<HistoryCommand>("history")
+                .AddCommand<GetRateCommand>("getrate")
                 .WithDescription(
                     "Gets the current Exchange rate(s). Use --save to save to database. Weekends and holidays are skipped."
                 )
                 .WithExample(
-                    new[] { "history", "--date", "YYYY-MM-DD", "--save", "--json", "--pretty", "--debug", "--hidden" }
+                    new[] { "getrate", "--symbols", "EUR,TRY", "--save", "--json", "--pretty", "--debug", "--hidden" }
                 );
 
             config
