@@ -68,9 +68,6 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
             + settings.Symbols
             + "&base="
             + settings.BaseSymbol;
-        var client = new HttpClient();
-        var response = client.GetAsync(url).GetAwaiter().GetResult();
-        var results = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
@@ -86,6 +83,9 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
+        var client = new HttpClient();
+        var response = client.GetAsync(url).GetAwaiter().GetResult();
+        var results = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         // Animate
         AnsiConsole
             .Live(titleTable)
