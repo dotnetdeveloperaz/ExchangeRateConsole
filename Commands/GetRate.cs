@@ -233,26 +233,16 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                 {
                     if (prop.GetValue(rates).ToString() != "0")
                     {
+                        Update(
+                            70,
+                            () =>
+                                titleTable.AddRow(
+                                    $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                                )
+                            );
                         if (settings.Save)
                         {
-                            Update(
-                                70,
-                                () =>
-                                    titleTable.AddRow(
-                                        $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
-                                    )
-                            );
-                            //                            await SaveAsync(prop.Name, double.Parse(prop.GetValue(rates).ToString()), exchangeRate.RateDate.ToString("yyyy-MM-dd"));
-                        }
-                        else
-                        {
-                            Update(
-                                70,
-                                () =>
-                                    titleTable.AddRow(
-                                        $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
-                                    )
-                            );
+//                            await SaveAsync(prop.Name, double.Parse(prop.GetValue(rates).ToString()), exchangeRate.RateDate.ToString("yyyy-MM-dd"));
                         }
                     }
                 }
