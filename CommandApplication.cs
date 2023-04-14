@@ -12,7 +12,6 @@ public class CommandApplication
         var app = new CommandApp();
         app.Configure(config =>
         {
-            config.ValidateExamples();
             config
                 .AddCommand<RestoreCacheCommand>("restore")
                 .WithDescription("Restores cache from failed completion");
@@ -35,6 +34,8 @@ public class CommandApplication
                         "YYYY-MM-DD",
                         "--symbols",
                         "EUR,TRY",
+                        "--base",
+                        "USD",
                         "--debug",
                         "--hidden"
                     }
@@ -46,7 +47,7 @@ public class CommandApplication
                     "Gets the current Exchange rate(s). Use --save to save to database. Weekends and holidays are skipped."
                 )
                 .WithExample(
-                    new[] { "getrate", "--symbols", "EUR,TRY", "--save", "--debug", "--hidden" }
+                    new[] { "getrate", "--symbols", "EUR,TRY", "--base", "USD", "--date", "YYYY-MM-DD", "--save", "--debug", "--hidden" }
                 );
 
             config
@@ -63,8 +64,10 @@ public class CommandApplication
                 .AddCommand<TestDatabaseCommand>("testdb")
                 .WithDescription("Tests The Database Connection.")
                 .WithExample(new[] { "testdb", "--debug", "--hidden" });
-
+#if DEBUG
             config.PropagateExceptions();
+            config.ValidateExamples();
+#endif
         });
         return app;
     }
