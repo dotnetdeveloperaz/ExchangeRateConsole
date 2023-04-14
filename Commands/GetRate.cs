@@ -194,7 +194,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                 }
                 Update(
                     70,
-                    () => titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
+                    () => titleTable.AddRow($"[red bold]Retrieving Exchange Rates For {settings.Date}[/]")
                 );
                 Exchange exchange;
                 if (settings.IsFake)

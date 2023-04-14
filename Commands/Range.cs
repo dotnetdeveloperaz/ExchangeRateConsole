@@ -215,7 +215,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                     70,
                     () =>
                         titleTable.AddRow(
-                            $"[red bold]Retrieving Rates from [/][blue]{settings.StartDate}[/] [red bold] To [/][blue]{settings.StartDate}[/]"
+                            $"[red bold]Retrieving Rates from [/][blue]{settings.StartDate}[/] [red bold] To [/][blue]{settings.EndDate}[/]"
                         )
                 );
                 List<Exchange> exchanges = new List<Exchange>();
