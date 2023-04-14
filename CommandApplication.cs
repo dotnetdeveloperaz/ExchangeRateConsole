@@ -14,6 +14,9 @@ public class CommandApplication
         {
             config.ValidateExamples();
             config
+                .AddCommand<RestoreCacheCommand>("restore")
+                .WithDescription("Restores cache from failed completion");
+            config
                 .AddCommand<AccountCommand>("account")
                 .WithDescription("Gets account information.");
 
