@@ -89,7 +89,7 @@ public class Utility
         return exchangeRates;
     }
 
-    private static void SaveRate(Exchange ExchangeRate)
+    public static void SaveRate(Exchange ExchangeRate)
     {
         var rates = ExchangeRate.rates;
 
