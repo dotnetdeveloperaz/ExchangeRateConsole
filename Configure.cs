@@ -16,9 +16,9 @@ public class Configure
             .AddJsonFile("appsettings.json")
             .AddUserSecrets("b378d9cd-2817-4513-a75f-1e91724e3131")
             .Build();
-        var secret = config["DefaultDB"];
-        if (config.GetSection("DefaultDB").Value != "")
-            configuration.DefaultDB = config.GetSection("DefaultDB").Value;
+        var secret = config["TestDB"];
+        if (config.GetSection("TestDB").Value != "")
+            configuration.DefaultDB = config.GetSection("TestDB").Value;
         if (config.GetSection("AppId").Value != "")
             configuration.AppId = "?app_id=" + config.GetSection("AppId").Value;
         configuration.BaseURL = config.GetSection("BaseURL").Value;
