@@ -43,16 +43,6 @@ public class RangeCommand : Command<RangeCommand.Settings>
         [DefaultValue(false)]
         public bool IsFake { get; set; }
 
-        [CommandOption("--json")]
-        [Description("Display The Raw JSON Response")]
-        [DefaultValue(false)]
-        public bool DisplayJson { get; set; }
-
-        [CommandOption("--pretty")]
-        [Description("Display The Raw JSON In Friendly Format Instead Of Minified")]
-        [DefaultValue(false)]
-        public bool Pretty { get; set; }
-
         [CommandOption("--debug")]
         [Description("Enable Debug Output")]
         [DefaultValue(false)]
@@ -69,7 +59,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
         var startDate = DateTime.Parse(settings.StartDate);
         var endDate = DateTime.Parse(settings.EndDate);
         settings.GetRange = true;
-         var url =
+        var url =
             Configure.Configuration.BaseURL
             + Configure.Configuration.History.Replace("{date}", settings.StartDate)
             + Configure.Configuration.AppId
@@ -83,14 +73,12 @@ public class RangeCommand : Command<RangeCommand.Settings>
         titleTable.MinimalBorder();
         titleTable.SimpleBorder();
         var symbols = settings.Symbols;
-        if(settings.Symbols == "")
+        if (settings.Symbols == "")
             symbols = "All Currencies";
 
         titleTable.AddColumn(
             new TableColumn(
-                new Markup(
-                    $"[yellow bold]Retrieving Exchange Rates For {symbols}[/]"
-                ).Centered()
+                new Markup($"[yellow bold]Retrieving Exchange Rates For {symbols}[/]").Centered()
             )
         );
         titleTable.BorderColor(Color.Blue);
@@ -112,35 +100,21 @@ public class RangeCommand : Command<RangeCommand.Settings>
                 }
                 var url =
                     Configure.Configuration.BaseURL
-                    + Configure.Configuration.Latest
+                    + Configure.Configuration.History
                     + Configure.Configuration.AppId
                     + "&symbols="
                     + settings.Symbols
                     + "&base="
                     + settings.BaseSymbol;
-                Update(
-                    70,
-                    () => titleTable.AddRow($"[red bold]Calculating Number Of Days[/]")
-                );
+                Update(70, () => titleTable.AddRow($"[red bold]Calculating Number Of Days[/]"));
                 var numDays = Utility.GetNumberOfDays(startDate, endDate);
                 Update(
                     70,
-                    () => titleTable.AddRow($":check_mark:[green bold] {numDays} Days To Process...[/]")
+                    () =>
+                        titleTable.AddRow(
+                            $":check_mark:[green bold] {numDays} Days To Process...[/]"
+                        )
                 );
-                Update(
-                    70,
-                    () => titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
-                );
-                var client = new HttpClient();
-                var response = client
-                    .GetAsync(url)
-                    .GetAwaiter()
-                    .GetResult();
-                var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                if (settings.DisplayJson)
-                {
-                    Update(70, () => titleTable.AddRow($"[red]Data: {info}[/]"));
-                }
                 if (settings.Debug)
                 {
                     if (settings.ShowHidden)
@@ -165,6 +139,11 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                 titleTable.AddRow(
                                     $"[red bold]Database Connection: [/][blue]{Configure.Configuration.DefaultDB}[/]"
                                 )
+                        );
+                        Update(
+                            70,
+                            () =>
+                                titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
                         );
                     }
                     Update(
@@ -199,7 +178,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Symbol: [/][blue]{Configure.Configuration.BaseSymbol}[/]"
+                                $"[red bold]Base Symbol: [/][blue]{settings.BaseSymbol}[/]"
                             )
                     );
                     Update(
@@ -231,49 +210,80 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                 $"[red bold]Show Secret: [/][blue]{settings.ShowHidden}[/]"
                             )
                     );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Show Json: [/][blue]{settings.DisplayJson}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () => titleTable.AddRow($"[red bold]Pretty: [/][blue]{settings.Pretty}[/]")
+                }
+                Update(
+                    70,
+                    () =>
+                        titleTable.AddRow(
+                            $"[red bold]Retrieving Rates from [/][blue]{settings.StartDate}[/] [red bold] To [/][blue]{settings.StartDate}[/]"
+                        )
+                );
+                List<Exchange> exchanges = new List<Exchange>();
+                if (settings.IsFake)
+                {
+                    string cache = File.ReadAllText("MultiDayRate.sample");
+                    exchanges = JsonConvert.DeserializeObject<List<Exchange>>(cache);
+                }
+                else
+                {
+                    exchanges = Utility.GetExchangeRates(
+                        url,
+                        settings.StartDate,
+                        settings.EndDate,
+                        settings.Save
                     );
                 }
-                var exchange = JsonConvert.DeserializeObject<Exchange>(info);
-                var rates = exchange.rates;
                 Update(
                     70,
                     () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s)...[/]")
                 );
 
-                foreach (PropertyInfo prop in rates.GetType().GetProperties())
+                foreach (var exchange in exchanges)
                 {
-                    if (prop.GetValue(rates).ToString() != "0")
+                    var rates = exchange.rates;
+                    var date = exchange.RateDate.ToString("MM-dd-yyyy");
+                    foreach (PropertyInfo prop in rates.GetType().GetProperties())
                     {
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
-                                )
-                            );
-                        if (settings.Save)
+                        if (prop.GetValue(rates).ToString() != "0")
                         {
-//                            await SaveAsync(prop.Name, double.Parse(prop.GetValue(rates).ToString()), exchangeRate.RateDate.ToString("yyyy-MM-dd"));
+                            if (!settings.IsFake)
+                            {
+                                Update(
+                                    70,
+                                    () =>
+                                        titleTable.AddRow(
+                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                        )
+                                );
+                            }
+                            else
+                            {
+                                if (settings.Symbols.Contains(prop.Name))
+                                    Update(
+                                        70,
+                                        () =>
+                                            titleTable.AddRow(
+                                                $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                            )
+                                    );
+                            }
+                        }
+                        // More rows than we want?
+                        if (titleTable.Rows.Count > Console.WindowHeight - 15)
+                        {
+                            // Remove the first one
+                            titleTable.Rows.RemoveAt(0);
                         }
                     }
-                    // More rows than we want?
-                    if (titleTable.Rows.Count > Console.WindowHeight - 15)
-                    {
-                        // Remove the first one
-                        titleTable.Rows.RemoveAt(0);
-                    }
                 }
-            });       
+                Update(
+                    70,
+                    () =>
+                        titleTable.Columns[0].Footer(
+                            $":check_mark:[green bold] Process Complete[/]"
+                        )
+                );
+            });
         return 0;
     }
 }
