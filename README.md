@@ -131,6 +131,40 @@ The available switches are:
             Shows all secret configuration            
 ```
 
+```
+dotnet run
+```
+This gives you the following screen.
+
+```
+USAGE:
+    ExchangeRateConsole.dll [OPTIONS] <COMMAND>
+
+EXAMPLES:
+    ExchangeRateConsole.dll range --start YYYY-MM-DD --end YYYY-MM-DD --symbols EUR,TRY --base USD 
+--debug --hidden
+    ExchangeRateConsole.dll getrate --symbols EUR,TRY --base USD --date YYYY-MM-DD --save --debug 
+--hidden
+    ExchangeRateConsole.dll acct --debug --hidden
+    ExchangeRateConsole.dll status --debug --hidden
+    ExchangeRateConsole.dll testdb --debug --hidden
+
+OPTIONS:
+    -h, --help       Prints help information   
+    -v, --version    Prints version information
+
+COMMANDS:
+    restore    Restores cache from failed completion                                                
+    account    Gets account information                                                             
+    range      Gets historical Exchange rate(s). Use --save to save to the database.                
+               Weekends and holidays are skipped because markets are closed                         
+    getrate    Gets the current Exchange rate(s). Use --save to save to database. Weekends and      
+               holidays are skipped                                                                 
+    acct       Gets Account Statistics                                                              
+    status     Gets WebApi Status                                                                   
+    testdb     Tests The Database Connection   
+```
+
 ### Built Using <a name = "built_using"></a>
 
 - [MariaDB](https://www.mariadb.com/) - Database (MySQL should be compatible as well)
