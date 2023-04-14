@@ -100,26 +100,13 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
-                var url =
-                    Configure.Configuration.BaseURL
-                    + Configure.Configuration.Latest
-                    + Configure.Configuration.AppId
-                    + "&symbols="
-                    + settings.Symbols
-                    + "&base="
-                    + settings.BaseSymbol;
                 Update(
                     70,
                     () => titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
                 );
                 var client = new HttpClient();
                 var response = client
-                    .GetAsync(
-                        Configure.Configuration.BaseURL
-                            + Configure.Configuration.Latest
-                            + settings.Symbols
-                            + Configure.Configuration.AppId
-                    )
+                    .GetAsync(url)
                     .GetAwaiter()
                     .GetResult();
                 var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -244,6 +231,12 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         {
 //                            await SaveAsync(prop.Name, double.Parse(prop.GetValue(rates).ToString()), exchangeRate.RateDate.ToString("yyyy-MM-dd"));
                         }
+                    }
+                    // More rows than we want?
+                    if (titleTable.Rows.Count > Console.WindowHeight - 15)
+                    {
+                        // Remove the first one
+                        titleTable.Rows.RemoveAt(0);
                     }
                 }
             });
