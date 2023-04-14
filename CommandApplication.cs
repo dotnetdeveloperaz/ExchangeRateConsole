@@ -14,6 +14,9 @@ public class CommandApplication
         {
             config.ValidateExamples();
             config
+                .AddCommand<RestoreCacheCommand>("restore")
+                .WithDescription("Restores cache from failed completion");
+            config
                 .AddCommand<AccountCommand>("account")
                 .WithDescription("Gets account information.");
 
@@ -32,8 +35,6 @@ public class CommandApplication
                         "YYYY-MM-DD",
                         "--symbols",
                         "EUR,TRY",
-                        "--json", 
-                        "--pretty", 
                         "--debug",
                         "--hidden"
                     }
@@ -45,18 +46,18 @@ public class CommandApplication
                     "Gets the current Exchange rate(s). Use --save to save to database. Weekends and holidays are skipped."
                 )
                 .WithExample(
-                    new[] { "getrate", "--symbols", "EUR,TRY", "--save", "--json", "--pretty", "--debug", "--hidden" }
+                    new[] { "getrate", "--symbols", "EUR,TRY", "--save", "--debug", "--hidden" }
                 );
 
             config
                 .AddCommand<AccountCommand>("acct")
                 .WithDescription("Gets Account Statistics.")
-                .WithExample(new[] { "acct", "--json", "--pretty", "--debug", "--hidden" });
+                .WithExample(new[] { "acct", "--debug", "--hidden" });
 
             config
                 .AddCommand<StatusCommand>("status")
                 .WithDescription("Gets WebApi Status.")
-                .WithExample(new[] { "status", "--json", "--pretty", "--debug", "--hidden" });
+                .WithExample(new[] { "status", "--debug", "--hidden" });
 
             config
                 .AddCommand<TestDatabaseCommand>("testdb")

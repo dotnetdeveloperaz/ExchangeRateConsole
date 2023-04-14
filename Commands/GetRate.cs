@@ -34,15 +34,10 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         [DefaultValue(false)]
         public bool Save { get; set; }
 
-        [CommandOption("--json")]
-        [Description("Display The Raw JSON Response")]
+        [CommandOption("--fake")]
+        [Description("Displays Data Without Calling Web API")]
         [DefaultValue(false)]
-        public bool DisplayJson { get; set; }
-
-        [CommandOption("--pretty")]
-        [Description("Display The Raw JSON In Friendly Format Instead Of Minified")]
-        [DefaultValue(false)]
-        public bool Pretty { get; set; }
+        public bool IsFake { get; set; }
 
         [CommandOption("--debug")]
         [Description("Enable Debug Output")]
@@ -60,6 +55,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         settings.GetRate = true;
         if (settings.Date == null)
             settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
+        bool skip = Utility.IsHolidayOrWeekend(settings.Date);
         var url =
             Configure.Configuration.BaseURL
             + Configure.Configuration.Latest
@@ -69,6 +65,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
             + "&base="
             + settings.BaseSymbol;
         var titleTable = new Table().Centered();
+
         // Borders
         titleTable.BorderColor(Color.Blue);
         titleTable.MinimalBorder();
@@ -83,9 +80,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
-        var client = new HttpClient();
-        var response = client.GetAsync(url).GetAwaiter().GetResult();
-        var results = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
         // Animate
         AnsiConsole
             .Live(titleTable)
@@ -100,20 +95,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
-                Update(
-                    70,
-                    () => titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
-                );
-                var client = new HttpClient();
-                var response = client
-                    .GetAsync(url)
-                    .GetAwaiter()
-                    .GetResult();
-                var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                if (settings.DisplayJson)
-                {
-                    Update(70, () => titleTable.AddRow($"[red]Data: {info}[/]"));
-                }
+
                 if (settings.Debug)
                 {
                     if (settings.ShowHidden)
@@ -199,17 +181,29 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                     );
                     Update(
                         70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Show Json: [/][blue]{settings.DisplayJson}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () => titleTable.AddRow($"[red bold]Pretty: [/][blue]{settings.Pretty}[/]")
+                        () => titleTable.AddRow($"[red bold]Holiday Or Weekend: [/][blue]{skip}[/]")
                     );
                 }
-                var exchange = JsonConvert.DeserializeObject<Exchange>(info);
+                if(skip)
+                {
+                    Update(
+                        70,
+                        () => titleTable.Columns[0].Footer($":stop_sign: [red bold]Skipping Holiday Or Weekend: [/][blue]{settings.Date}[/]")
+                    );
+                    return;
+                }
+                Update(
+                    70,
+                    () => titleTable.AddRow($"[red bold]Calling Full URL: [/][blue]{url}[/]")
+                );
+                Exchange exchange;
+                if (settings.IsFake)
+                {
+                    string cache = File.ReadAllText("OneDayRate.sample");
+                    exchange = JsonConvert.DeserializeObject<Exchange>(cache);
+                }
+                else
+                    exchange = Utility.GetExchangeRate(url, settings.Save);
                 var rates = exchange.rates;
                 Update(
                     70,
@@ -220,16 +214,26 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                 {
                     if (prop.GetValue(rates).ToString() != "0")
                     {
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
-                                )
-                            );
-                        if (settings.Save)
+                        if (!settings.IsFake)
                         {
-//                            await SaveAsync(prop.Name, double.Parse(prop.GetValue(rates).ToString()), exchangeRate.RateDate.ToString("yyyy-MM-dd"));
+                            Update(
+                                70,
+                                () =>
+                                    titleTable.AddRow(
+                                        $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                                    )
+                            );
+                        }
+                        else
+                        {
+                            if(settings.Symbols.Contains(prop.Name))
+                                Update(
+                                    70,
+                                    () =>
+                                        titleTable.AddRow(
+                                            $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                                        )
+                                );
                         }
                     }
                     // More rows than we want?
@@ -239,6 +243,13 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         titleTable.Rows.RemoveAt(0);
                     }
                 }
+                Update(
+                    70,
+                    () =>
+                        titleTable.Columns[0].Footer(
+                            $":check_mark:[green bold] Process Complete[/]"
+                        )
+                );
             });
         return 0;
     }

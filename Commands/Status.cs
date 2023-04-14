@@ -17,16 +17,6 @@ public class StatusCommand : Command<StatusCommand.Settings>
         [DefaultValue(false)]
         public bool Save { get; set; }
 
-        [CommandOption("--json")]
-        [Description("Display The Raw JSON Response")]
-        [DefaultValue(false)]
-        public bool DisplayJson { get; set; }
-
-        [CommandOption("--pretty")]
-        [Description("Display The Raw JSON In Friendly Format Instead Of Minified")]
-        [DefaultValue(false)]
-        public bool Pretty { get; set; }
-
         [CommandOption("--debug")]
         [Description("Enable Debug Output")]
         [DefaultValue(false)]
@@ -41,9 +31,11 @@ public class StatusCommand : Command<StatusCommand.Settings>
     public override int Execute(CommandContext context, Settings settings)
     {
         settings.GetStatus = true;
-        AnsiConsole.Write(new Markup(
-            $"[red bold]Executed GetStatus[/] Execute? {settings.GetStatus} Debug: {settings.Debug} Hidden: {settings.ShowHidden}"
-            ));
+        AnsiConsole.Write(
+            new Markup(
+                $"[red bold]Executed GetStatus[/] Execute? {settings.GetStatus} Debug: {settings.Debug} Hidden: {settings.ShowHidden}"
+            )
+        );
         return 0;
     }
 }
