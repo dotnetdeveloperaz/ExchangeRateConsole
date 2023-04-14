@@ -44,13 +44,12 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 *Optional* Restore the database in the db folder (it only contains historical data for EUR and TRY)
-```
 Extract ExchangeRates.sql from the ExchangeRates.sql.gz archive located in the db folder.
+```
 mysql -u [user] -p [database name] < ExchangeRates.sql
 ```
 Table creation, run ExchangeRates-table.sql
 Stored procedure, run usp_AddExchangeRate.sql
-```
 
 Build the project by running the following in the project folder.
 ``` 
@@ -99,18 +98,22 @@ You should see the following screen:
 ```
 
 ### Usage <a name="usage"></a>
-dotnet run <command> [switches]
+dotnet run [command] [switches]
 
 The individual commands are:
-
+```
 range       Gets exchange rates between two date ranges
+
 getrate     Gets the current rate or for the day specified
+
 acct        Gets account details
+
 status      Gets the WebApi Status (available or not)
+
 testdb      Tests your database connection string
-
+```
 The available switches are:
-
+```
 --symbols   These are commma separated, no space.
             --switch EUR,TRY
 --save      Saves the exchange rate data to the database
@@ -127,7 +130,7 @@ The available switches are:
             shows configuration data
 --hidden    Available on all commands
             Shows all secret configuration            
-
+```
 
 ### Built Using <a name = "built_using"></a>
 
