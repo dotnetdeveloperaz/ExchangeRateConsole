@@ -7,16 +7,16 @@ namespace ExchangeRateConsole;
 public class Utility
 {
     private static List<DateTime> listOfDays;
-    private static Exchange exchangeRate;
+    private static List<Exchange> exchangeRates;
 
     public List<DateTime> ListOfDays
     {
         get { return listOfDays; }
     }
 
-    public Exchange ExchangeRateConsole
+    public List<Exchange> ExchangeRates
     {
-        get { return exchangeRate; }
+        get { return exchangeRates; }
     }
 
     public static int GetNumberOfDays(DateTime start, DateTime end)
@@ -33,8 +33,8 @@ public class Utility
                 && start.DayOfWeek != DayOfWeek.Saturday
                 && start.DayOfWeek != DayOfWeek.Sunday
             )
-            
-            i++;
+
+                i++;
             listOfDays.Add(start);
             start = start.AddDays(1);
         }
@@ -56,11 +56,26 @@ public class Utility
         var client = new HttpClient();
         var response = client.GetAsync(Uri).GetAwaiter().GetResult();
         var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        exchangeRate = JsonConvert.DeserializeObject<Exchange>(info);
+        var exchangeRate = JsonConvert.DeserializeObject<Exchange>(info);
 
-//        string result = JsonConvert.SerializeObject(exchangeRate, Formatting.Indented);
-//        File.AppendAllText($"OneDayRate.sample", result);
+        // Need to add save functionality.
 
         return exchangeRate;
+    }
+
+    public static List<Exchange> GetExchangeRates(string Uri, string StartDate, string EndDate, bool Save)
+    {
+        DateTime startDate = DateTime.Parse(StartDate);
+        DateTime endDate = DateTime.Parse(EndDate);
+
+        exchangeRates = new List<Exchange>();
+        while (startDate <= endDate)
+        {
+            var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
+            exchangeRates.Add(GetExchangeRate(url, Save));
+            startDate = startDate.AddDays(1);
+        }
+
+        return exchangeRates;
     }
 }
