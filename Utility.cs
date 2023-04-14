@@ -1,4 +1,7 @@
+using System.Data;
+using System.Reflection;
 using Newtonsoft.Json;
+using MySqlConnector;
 using PublicHoliday;
 using ExchangeRateConsole.Models;
 
@@ -59,11 +62,18 @@ public class Utility
         var exchangeRate = JsonConvert.DeserializeObject<Exchange>(info);
 
         // Need to add save functionality.
+        if(Save)
+            SaveRate(exchangeRate);
 
         return exchangeRate;
     }
 
-    public static List<Exchange> GetExchangeRates(string Uri, string StartDate, string EndDate, bool Save)
+    public static List<Exchange> GetExchangeRates(
+        string Uri,
+        string StartDate,
+        string EndDate,
+        bool Save
+    )
     {
         DateTime startDate = DateTime.Parse(StartDate);
         DateTime endDate = DateTime.Parse(EndDate);
@@ -77,5 +87,52 @@ public class Utility
         }
 
         return exchangeRates;
+    }
+
+    private static void SaveRate(Exchange ExchangeRate)
+    {
+        var rates = ExchangeRate.rates;
+
+        foreach (PropertyInfo prop in rates.GetType().GetProperties())
+        {
+            if (prop.GetValue(rates).ToString() != "0")
+            {
+                var Symbol = prop.Name;
+                var Rate = double.Parse(prop.GetValue(rates).ToString());
+                var RateDate = ExchangeRate.RateDate.ToString("yyyy-MM-dd");
+
+                MySqlConnection sqlConnection = new MySqlConnection(Configure.Configuration.DefaultDB);
+                MySqlCommand sqlCommand = new MySqlCommand("usp_AddExchangeRate", sqlConnection);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                try
+                {
+                    sqlConnection.Open();
+                    sqlCommand.Parameters.AddWithValue("symbol", Symbol);
+                    sqlCommand.Parameters.AddWithValue("rate", Rate);
+                    sqlCommand.Parameters.AddWithValue("ratedate", RateDate);
+                    var recs = sqlCommand.ExecuteNonQuery();
+                }
+                catch (MySqlException)
+                {
+                    //Console.WriteLine($"Exception: {ex.Message}");
+                    /// TODO
+                    // We need to add error bubble up to the caller
+                    // in the case this is the date range call so
+                    // that we can save the results for later saving
+                    // to avoid doubling up on the webapi call to the
+                    // third party.
+                    string result = JsonConvert.SerializeObject(ExchangeRate, Formatting.Indented);
+                    File.AppendAllText($"ExchangeRate.cache", result);
+                    return;
+                }
+                finally
+                {
+                    if (sqlConnection.State == ConnectionState.Open)
+                        sqlConnection.Close();
+                    sqlCommand.Dispose();
+                    sqlConnection.Dispose();
+                }
+            }
+        }
     }
 }
