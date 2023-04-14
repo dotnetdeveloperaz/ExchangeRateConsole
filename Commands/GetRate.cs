@@ -55,6 +55,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         settings.GetRate = true;
         if (settings.Date == null)
             settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
+        bool skip = Utility.IsHolidayOrWeekend(settings.Date);
         var url =
             Configure.Configuration.BaseURL
             + Configure.Configuration.Latest
@@ -64,6 +65,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
             + "&base="
             + settings.BaseSymbol;
         var titleTable = new Table().Centered();
+
         // Borders
         titleTable.BorderColor(Color.Blue);
         titleTable.MinimalBorder();
@@ -78,9 +80,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
-        var client = new HttpClient();
-        var response = client.GetAsync(url).GetAwaiter().GetResult();
-        var results = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
         // Animate
         AnsiConsole
             .Live(titleTable)
@@ -179,6 +179,18 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                                 $"[red bold]Show Secret: [/][blue]{settings.ShowHidden}[/]"
                             )
                     );
+                    Update(
+                        70,
+                        () => titleTable.AddRow($"[red bold]Holiday Or Weekend: [/][blue]{skip}[/]")
+                    );
+                }
+                if(skip)
+                {
+                    Update(
+                        70,
+                        () => titleTable.Columns[0].Footer($":stop_sign: [red bold]Skipping Holiday Or Weekend: [/][blue]{settings.Date}[/]")
+                    );
+                    return;
                 }
                 Update(
                     70,
