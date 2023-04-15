@@ -9,11 +9,13 @@ on:
     paths-ignore:
       - '**.md'
       - '**.gz'
+      - '**.sql'
   pull_request:
     branches: [ main ]
     paths-ignore:
       - '**.md'
       - '**.gz'
+      - '**.sql'
 jobs:
   build:
 

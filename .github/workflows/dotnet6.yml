@@ -5,13 +5,17 @@ name: Exchange Rate Console .NET 6 Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
     paths-ignore:
       - '**.md'
+      - '**.gz'
+      - '**.sql'
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
     paths-ignore:
       - '**.md'
+      - '**.gz'
+      - '**.sql'
 
 jobs:
   build:
