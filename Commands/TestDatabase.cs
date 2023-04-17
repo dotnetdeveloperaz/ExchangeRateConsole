@@ -1,12 +1,20 @@
 using System.ComponentModel;
-using Spectre.Console;
-using Spectre.Console.Cli;
 using MySqlConnector;
+using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole.Commands;
 
 public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
 {
+    private readonly Configuration _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public TestDatabaseCommand(Configuration config, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Web API Status.")]
@@ -41,6 +49,8 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
+
+        var Configure = _config;
         // Animate
         AnsiConsole
             .Live(titleTable)
@@ -60,7 +70,7 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
                 Update(70, () =>
                     titleTable.AddRow(
                         $":hourglass_not_done:[red bold] Testing Connection...[/]"));
-                var conn = new MySqlConnection(Configure.Configuration.DefaultDB);
+                var conn = new MySqlConnection(_config.ConnectionStrings.DefaultDB);
                 try
                 {
                     conn.Open();

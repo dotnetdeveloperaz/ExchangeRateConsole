@@ -12,6 +12,15 @@ namespace ExchangeRateConsole.Commands;
 
 public class AccountCommand : Command<AccountCommand.Settings>
 {
+    private readonly Configuration _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public AccountCommand(Configuration config, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Account Statistics.")]
@@ -72,14 +81,14 @@ public class AccountCommand : Command<AccountCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId.Replace("?app_id=", "")}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database: [/][blue]{Configure.Configuration.DefaultDB}[/]"
+                                    $"[red bold]Database: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
                                 )
                         );
                     }
@@ -87,35 +96,35 @@ public class AccountCommand : Command<AccountCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{Configure.Configuration.History}[/]"
+                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{Configure.Configuration.Latest}[/]"
+                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{Configure.Configuration.Usage}[/]"
+                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Symbol: [/][blue]{Configure.Configuration.BaseSymbol}[/]"
+                                $"[red bold]Base Symbol: [/][blue]{_config.BaseSymbol}[/]"
                             )
                     );
                     Update(
@@ -140,9 +149,9 @@ public class AccountCommand : Command<AccountCommand.Settings>
                 var client = new HttpClient();
                 var response = client
                     .GetAsync(
-                        Configure.Configuration.BaseURL
-                            + Configure.Configuration.Usage
-                            + Configure.Configuration.AppId
+                        _config.BaseURL
+                            + _config.Usage
+                            + _config.AppId
                     )
                     .GetAwaiter()
                     .GetResult();

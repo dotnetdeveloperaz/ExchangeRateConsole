@@ -1,35 +1,15 @@
-using Microsoft.Extensions.Configuration;
 using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole;
 
 public class Configure
 {
-    private static Configuration _configuration;
-    public static Configuration Configuration { get { return _configuration; } }
-    public static Version Version { get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; } }
-
-    public static Configuration Load(Configuration configuration)
+    public static IConfigurationRoot ConfigureAppSettings()
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json")
-            .AddUserSecrets("b378d9cd-2817-4513-a75f-1e91724e3131")
-            .Build();
-        if (config.GetSection("ConnectionStrings").GetSection("DefaultDB").Value != "")
-            configuration.DefaultDB = config.GetSection("ConnectionStrings").GetSection("DefaultDB").Value;
-        else
-            configuration.DefaultDB = config.GetSection("DefaultDB").Value;
-        if (config.GetSection("AppId").Value != "")
-            configuration.AppId = "?app_id=" + config.GetSection("AppId").Value;
-        Console.WriteLine($"AppId: {configuration.AppId}");
-        configuration.BaseURL = config.GetSection("BaseURL").Value;
-        configuration.DefaultSymbols = config.GetSection("DefaultSymbols").Value;
-        configuration.History = config.GetSection("History").Value;
-        configuration.Latest = config.GetSection("Latest").Value;
-        configuration.Usage = config.GetSection("Usage").Value;
-        configuration.BaseSymbol = config.GetSection("BaseSymbol").Value;
-        _configuration = configuration;
-        return configuration;
+        var configBuilder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+        return configBuilder.Build();
     }
 }

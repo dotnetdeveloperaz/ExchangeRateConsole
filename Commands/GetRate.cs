@@ -10,6 +10,15 @@ namespace ExchangeRateConsole.Commands;
 
 public class GetRateCommand : Command<GetRateCommand.Settings>
 {
+    private readonly Configuration _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public GetRateCommand(Configuration config, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Rate For Specified Date")]
@@ -57,9 +66,9 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
             settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
         bool skip = Utility.IsHolidayOrWeekend(settings.Date);
         var url =
-            Configure.Configuration.BaseURL
-            + Configure.Configuration.Latest
-            + Configure.Configuration.AppId
+            _config.BaseURL
+            + _config.Latest
+            + _config.AppId
             + "&symbols="
             + settings.Symbols
             + "&base="
@@ -104,21 +113,21 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Calling WebAPI URL: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                    $"[red bold]Calling WebAPI URL: [/][blue]{_config.BaseURL}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId.Replace("?app_id=", "")}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{Configure.Configuration.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
                                 )
                         );
                     }
@@ -126,35 +135,35 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{Configure.Configuration.History}[/]"
+                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{Configure.Configuration.Latest}[/]"
+                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{Configure.Configuration.Usage}[/]"
+                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Symbol: [/][blue]{Configure.Configuration.BaseSymbol}[/]"
+                                $"[red bold]Base Symbol: [/][blue]{_config.BaseSymbol}[/]"
                             )
                     );
                     Update(
@@ -203,7 +212,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                     exchange = JsonConvert.DeserializeObject<Exchange>(cache);
                 }
                 else
-                    exchange = Utility.GetExchangeRate(url, settings.Save);
+                    exchange = Utility.GetExchangeRate(url, settings.Save, _config.ConnectionStrings.DefaultDB);
                 var rates = exchange.rates;
                 Update(
                     70,

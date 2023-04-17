@@ -9,6 +9,15 @@ namespace ExchangeRateConsole.Commands;
 
 public class RangeCommand : Command<RangeCommand.Settings>
 {
+    private readonly Configuration _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public RangeCommand(Configuration config, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Rates For A Date Range.")]
@@ -59,14 +68,6 @@ public class RangeCommand : Command<RangeCommand.Settings>
         var startDate = DateTime.Parse(settings.StartDate);
         var endDate = DateTime.Parse(settings.EndDate);
         settings.GetRange = true;
-        var url =
-            Configure.Configuration.BaseURL
-            + Configure.Configuration.History.Replace("{date}", settings.StartDate)
-            + Configure.Configuration.AppId
-            + "&symbols="
-            + settings.Symbols
-            + "&base="
-            + settings.BaseSymbol;
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
@@ -99,9 +100,9 @@ public class RangeCommand : Command<RangeCommand.Settings>
                     Thread.Sleep(delay);
                 }
                 var url =
-                    Configure.Configuration.BaseURL
-                    + Configure.Configuration.History
-                    + Configure.Configuration.AppId
+                    _config.BaseURL
+                    + _config.History
+                    + _config.AppId
                     + "&symbols="
                     + settings.Symbols
                     + "&base="
@@ -123,21 +124,21 @@ public class RangeCommand : Command<RangeCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Calling WebAPI URL: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                    $"[red bold]Calling WebAPI URL: [/][blue]{_config.BaseURL}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId.Replace("?app_id=", "")}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{Configure.Configuration.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
                                 )
                         );
                         Update(
@@ -150,28 +151,28 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{Configure.Configuration.History}[/]"
+                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{Configure.Configuration.Latest}[/]"
+                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{Configure.Configuration.Usage}[/]"
+                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
                             )
                     );
                     Update(
@@ -230,7 +231,8 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         url,
                         settings.StartDate,
                         settings.EndDate,
-                        settings.Save
+                        settings.Save,
+                        _config.ConnectionStrings.DefaultDB
                     );
                 }
                 Update(

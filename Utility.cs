@@ -54,7 +54,7 @@ public class Utility
             return false;
     }
 
-    public static Exchange GetExchangeRate(string Uri, bool Save)
+    public static Exchange GetExchangeRate(string Uri, bool Save, string ConnectionString)
     {
         var client = new HttpClient();
         var response = client.GetAsync(Uri).GetAwaiter().GetResult();
@@ -63,7 +63,7 @@ public class Utility
 
         // Need to add save functionality.
         if(Save)
-            SaveRate(exchangeRate);
+            SaveRate(exchangeRate, ConnectionString);
 
         return exchangeRate;
     }
@@ -72,7 +72,8 @@ public class Utility
         string Uri,
         string StartDate,
         string EndDate,
-        bool Save
+        bool Save,
+        string ConnectionString
     )
     {
         DateTime startDate = DateTime.Parse(StartDate);
@@ -82,14 +83,14 @@ public class Utility
         while (startDate <= endDate)
         {
             var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
-            exchangeRates.Add(GetExchangeRate(url, Save));
+            exchangeRates.Add(GetExchangeRate(url, Save, ConnectionString));
             startDate = startDate.AddDays(1);
         }
 
         return exchangeRates;
     }
 
-    public static void SaveRate(Exchange ExchangeRate)
+    public static void SaveRate(Exchange ExchangeRate, string ConnectionString)
     {
         var rates = ExchangeRate.rates;
 
@@ -101,7 +102,7 @@ public class Utility
                 var Rate = double.Parse(prop.GetValue(rates).ToString());
                 var RateDate = ExchangeRate.RateDate.ToString("yyyy-MM-dd");
 
-                MySqlConnection sqlConnection = new MySqlConnection(Configure.Configuration.DefaultDB);
+                MySqlConnection sqlConnection = new MySqlConnection(ConnectionString);
                 MySqlCommand sqlCommand = new MySqlCommand("usp_AddExchangeRate", sqlConnection);
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 try

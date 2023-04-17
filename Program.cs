@@ -1,19 +1,20 @@
-﻿using Spectre.Console;
-using Spectre.Console.Cli;
+﻿using ExchangeRateConsole.Commands;
 using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole;
 
 class Program
 {
-    static Configuration configuration = new();
-    static Exchange exchange = new();
- 
     public static async Task Main(string[] args)
     {
         Title.Print();
-        configuration = Configure.Load(configuration);
-        var app = CommandApplication.Initialize();
+        var config = Configure.ConfigureAppSettings();
+        var serviceCollection = ConfigureServices(config);
+
+        //var app = CommandApplication.Initialize();
+        var registrar = new TypeRegistrar(serviceCollection);
+        var app = new CommandApp<TestDatabaseCommand>(registrar);
+
         try
         {
             await app.RunAsync(args);
@@ -22,5 +23,24 @@ class Program
         {
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
         }
+    }
+
+    public static IServiceCollection ConfigureServices(IConfiguration config)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(config);
+/*        services.AddSingleton<Configuration>(
+            config.GetSection(nameof(Configuration)).Get<Configuration>()
+        );
+*/
+        services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.AddConfiguration(config.GetSection("Logging"));
+            loggingBuilder.AddEventSourceLogger();
+        });
+
+        services.AddSingleton<ExchangeRateEventSource>();
+        //services.BuildServiceProvider();
+        return services;
     }
 }

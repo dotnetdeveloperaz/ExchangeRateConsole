@@ -10,6 +10,15 @@ namespace ExchangeRateConsole.Commands;
 
 public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
 {
+    private readonly Configuration _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public RestoreCacheCommand(Configuration config, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Restore Cache.")]
@@ -69,14 +78,14 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId.Replace("?app_id=", "")}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{Configure.Configuration.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
                                 )
                         );
                     }
@@ -84,28 +93,28 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{Configure.Configuration.History}[/]"
+                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{Configure.Configuration.Latest}[/]"
+                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{Configure.Configuration.Usage}[/]"
+                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
                             )
                     );
                     Update(
@@ -131,7 +140,7 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                                 ":check_mark:[green bold] Cache File Loaded[/]"));
                 foreach (var exchange in exchanges)
                 {
-                    Utility.SaveRate(exchange);
+                    Utility.SaveRate(exchange, _config.ConnectionStrings.DefaultDB);
                     var rates = exchange.rates;
                     var date = exchange.RateDate.ToString("MM-dd-yyyy");
 
