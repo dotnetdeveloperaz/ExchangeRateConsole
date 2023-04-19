@@ -1,20 +1,21 @@
-using System.ComponentModel;
-using System.Reflection;
-using Spectre.Console;
-using Spectre.Console.Cli;
-using Newtonsoft.Json;
 using ExchangeRateConsole.Models;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Globalization;
+using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
 public class RangeCommand : Command<RangeCommand.Settings>
 {
-    private readonly Configuration _config;
+    private readonly string _connectionString;
+    private readonly ApiServer _config;
     private ExchangeRateEventSource _eventSource;
 
-    public RangeCommand(Configuration config, ExchangeRateEventSource eventSource)
+    public RangeCommand(ApiServer config, ConnectionStrings ConnectionString, ExchangeRateEventSource eventSource)
     {
         _config = config;
+        _connectionString = ConnectionString.DefaultDB;
         _eventSource = eventSource;
     }
 
@@ -100,9 +101,9 @@ public class RangeCommand : Command<RangeCommand.Settings>
                     Thread.Sleep(delay);
                 }
                 var url =
-                    _config.BaseURL
+                    _config.BaseUrl
                     + _config.History
-                    + _config.AppId
+                    + "?app_id=" + _config.AppId
                     + "&symbols="
                     + settings.Symbols
                     + "&base="
@@ -124,21 +125,21 @@ public class RangeCommand : Command<RangeCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Calling WebAPI URL: [/][blue]{_config.BaseURL}[/]"
+                                    $"[red bold]Calling WebAPI URL: [/][blue]{url}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_connectionString}[/]"
                                 )
                         );
                         Update(
@@ -151,7 +152,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
                             )
                     );
                     Update(
@@ -232,7 +233,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         settings.StartDate,
                         settings.EndDate,
                         settings.Save,
-                        _config.ConnectionStrings.DefaultDB
+                        _connectionString
                     );
                 }
                 Update(
@@ -254,7 +255,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                     70,
                                     () =>
                                         titleTable.AddRow(
-                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                         )
                                 );
                             }
@@ -265,7 +266,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                         70,
                                         () =>
                                             titleTable.AddRow(
-                                                $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                                $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                             )
                                     );
                             }

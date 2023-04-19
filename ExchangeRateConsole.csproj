@@ -2,15 +2,10 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <UserSecretsId>b378d9cd-2817-4513-a75f-1e91724e3131</UserSecretsId>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <GeneratedAssemblyInfoFile>assemblyinfo.cs</GeneratedAssemblyInfoFile>
-    <Deterministic>false</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>

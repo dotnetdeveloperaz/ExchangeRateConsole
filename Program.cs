@@ -1,5 +1,4 @@
-﻿using ExchangeRateConsole.Commands;
-using ExchangeRateConsole.Models;
+﻿using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole;
 
@@ -9,11 +8,12 @@ class Program
     {
         Title.Print();
         var config = Configure.ConfigureAppSettings();
-        var serviceCollection = ConfigureServices(config);
-
-        //var app = CommandApplication.Initialize();
+        IServiceCollection serviceCollection = ConfigureServices(config);
         var registrar = new TypeRegistrar(serviceCollection);
-        var app = new CommandApp<TestDatabaseCommand>(registrar);
+
+        var app = new CommandApp(registrar);
+        app.Configure(configure => CommandApplication.Initialize(app));
+
 
         try
         {
@@ -27,20 +27,20 @@ class Program
 
     public static IServiceCollection ConfigureServices(IConfiguration config)
     {
+        var logging = config.GetSection("Logging");
+        var database = config.GetSection("ConnectionStrings");
+        config = config.GetSection("ApiServer");
         var services = new ServiceCollection();
-        services.AddSingleton(config);
-/*        services.AddSingleton<Configuration>(
-            config.GetSection(nameof(Configuration)).Get<Configuration>()
-        );
-*/
+        services.AddSingleton(new ApiServer() { AppId = config.GetSection("AppId").Value, BaseUrl = config.GetSection("BaseUrl").Value, BaseSymbol = config.GetSection("BaseSymbol").Value, History = config.GetSection("History").Value, Latest = config.GetSection("Latest").Value, Usage = config.GetSection("Usage").Value });
+        services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
         services.AddLogging(loggingBuilder =>
-        {
-            loggingBuilder.AddConfiguration(config.GetSection("Logging"));
-            loggingBuilder.AddEventSourceLogger();
-        });
+      {
+          loggingBuilder.AddConfiguration(config.GetSection("Logging"));
+          loggingBuilder.AddEventSourceLogger();
+      });
 
         services.AddSingleton<ExchangeRateEventSource>();
-        //services.BuildServiceProvider();
+        services.BuildServiceProvider();
         return services;
     }
 }

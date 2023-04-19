@@ -1,21 +1,20 @@
+using ExchangeRateConsole.Models;
+using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Reflection;
-using Spectre.Console;
-using Spectre.Console.Cli;
-using MySqlConnector;
-using Newtonsoft.Json;
-using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole.Commands;
 
 public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
 {
-    private readonly Configuration _config;
+    private readonly ApiServer _config;
+    private readonly string _connectionString;
     private ExchangeRateEventSource _eventSource;
 
-    public RestoreCacheCommand(Configuration config, ExchangeRateEventSource eventSource)
+    public RestoreCacheCommand(ApiServer config, ConnectionStrings ConnectionString, ExchangeRateEventSource eventSource)
     {
         _config = config;
+        _connectionString = ConnectionString.DefaultDB;
         _eventSource = eventSource;
     }
 
@@ -85,7 +84,7 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_connectionString}[/]"
                                 )
                         );
                     }
@@ -93,7 +92,7 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
                             )
                     );
                     Update(
@@ -140,7 +139,7 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                                 ":check_mark:[green bold] Cache File Loaded[/]"));
                 foreach (var exchange in exchanges)
                 {
-                    Utility.SaveRate(exchange, _config.ConnectionStrings.DefaultDB);
+                    Utility.SaveRate(exchange, _connectionString);
                     var rates = exchange.rates;
                     var date = exchange.RateDate.ToString("MM-dd-yyyy");
 
