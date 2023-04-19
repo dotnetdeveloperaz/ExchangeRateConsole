@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '6.x', '7.x', '8.0.100-preview.2.23157.25']
+        dotnet-version: [ '6.x.x', '7.x.x', '8.0.100-preview.2.23157.25']
 
     steps:
     - name: Setup .NET ${{ matrix.dotnet-version }}
