@@ -31,6 +31,7 @@ jobs:
         dotnet-version: ${{ matrix.dotnet-version }}
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: ./
     - name: Build
       run: dotnet build --no-restore
     - name: Test
