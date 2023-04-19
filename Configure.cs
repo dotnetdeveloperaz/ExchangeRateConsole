@@ -1,15 +1,15 @@
-using ExchangeRateConsole.Models;
-
 namespace ExchangeRateConsole;
 
 public class Configure
 {
-    public static IConfigurationRoot ConfigureAppSettings()
+    public static IConfiguration ConfigureAppSettings()
     {
         var configBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddUserSecrets<Program>()
+            .Build();
 
-        return configBuilder.Build();
+        return configBuilder;
     }
 }

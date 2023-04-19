@@ -1,18 +1,19 @@
-using System.ComponentModel;
-using MySqlConnector;
 using ExchangeRateConsole.Models;
+using MySqlConnector;
+using System.ComponentModel;
 
 namespace ExchangeRateConsole.Commands;
 
 public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
 {
-    private readonly Configuration _config;
-    private ExchangeRateEventSource _eventSource;
+    private readonly string _connectionString;
+    //private ILogger eventSource { get; }
 
-    public TestDatabaseCommand(Configuration config, ExchangeRateEventSource eventSource)
+    //    public TestDatabaseCommand(IConfigurationSection config, ILogger<Program> eventSource)
+    public TestDatabaseCommand(ConnectionStrings ConnectionString)
     {
-        _config = config;
-        _eventSource = eventSource;
+        _connectionString = ConnectionString.DefaultDB;
+        // _ = eventSource ?? throw new ArgumentNullException(nameof(eventSource));
     }
 
     public class Settings : CommandSettings
@@ -50,7 +51,6 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
 
-        var Configure = _config;
         // Animate
         AnsiConsole
             .Live(titleTable)
@@ -70,16 +70,16 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
                 Update(70, () =>
                     titleTable.AddRow(
                         $":hourglass_not_done:[red bold] Testing Connection...[/]"));
-                var conn = new MySqlConnection(_config.ConnectionStrings.DefaultDB);
+                var conn = new MySqlConnection(_connectionString);
                 try
                 {
                     conn.Open();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                Update(70, () =>
-                            titleTable.AddRow(
-                                $"[red bold]Error Connecting to Database: {ex.Message}"));
+                    Update(70, () =>
+                                titleTable.AddRow(
+                                    $"[red bold]Error Connecting to Database: {ex.Message}[/]"));
                 }
                 conn.Close();
                 Update(70, () =>

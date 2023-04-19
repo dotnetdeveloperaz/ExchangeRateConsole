@@ -1,23 +1,19 @@
-using System.ComponentModel;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Spectre.Console;
-using Spectre.Console.Cli;
-using Newtonsoft.Json;
 using ExchangeRateConsole.Models;
+using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace ExchangeRateConsole.Commands;
 
 public class AccountCommand : Command<AccountCommand.Settings>
 {
-    private readonly Configuration _config;
+    private readonly ApiServer _config;
+    private readonly string _connectionString;
     private ExchangeRateEventSource _eventSource;
 
-    public AccountCommand(Configuration config, ExchangeRateEventSource eventSource)
+    public AccountCommand(ApiServer config, ConnectionStrings ConnectionString, ExchangeRateEventSource eventSource)
     {
         _config = config;
+        _connectionString = ConnectionString.DefaultDB;
         _eventSource = eventSource;
     }
 
@@ -88,7 +84,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database: [/][blue]{_config.ConnectionStrings.DefaultDB}[/]"
+                                    $"[red bold]Database: [/][blue]{_connectionString}[/]"
                                 )
                         );
                     }
@@ -96,7 +92,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{_config.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
                             )
                     );
                     Update(
@@ -149,7 +145,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                 var client = new HttpClient();
                 var response = client
                     .GetAsync(
-                        _config.BaseURL
+                        _config.BaseUrl
                             + _config.Usage
                             + _config.AppId
                     )
