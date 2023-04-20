@@ -52,7 +52,7 @@ Set your configuration for AppId for the Open Exchange API and database connecti
 ```
 dotnet user-secrets init
 dotnet user-secrets set "AppId" "Your AppId"
-dotnet user-secrets set "ConnectionStrings:DefaultDB" "<Your database connection string>
+dotnet user-secrets set "ConnectionStrings:DefaultDB" "<Your database connection string>"
 ```
 
 Build the project by running the following in the project folder.
