@@ -16,8 +16,7 @@ on:
       - '**.md'
       - '**.gz'
       - '**.sql'
-env:
-  DOTNET_VERSION: '7.0.x'
+
 jobs:
   build:
 
