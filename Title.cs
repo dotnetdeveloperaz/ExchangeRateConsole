@@ -1,6 +1,3 @@
-using Spectre.Console;
-using Spectre.Console.Cli;
-
 namespace ExchangeRateConsole;
 
 class Title

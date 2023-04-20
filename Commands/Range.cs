@@ -1,14 +1,24 @@
-using System.ComponentModel;
-using System.Reflection;
-using Spectre.Console;
-using Spectre.Console.Cli;
-using Newtonsoft.Json;
 using ExchangeRateConsole.Models;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Globalization;
+using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
 public class RangeCommand : Command<RangeCommand.Settings>
 {
+    private readonly string _connectionString;
+    private readonly ApiServer _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public RangeCommand(ApiServer config, ConnectionStrings ConnectionString, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _connectionString = ConnectionString.DefaultDB;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Rates For A Date Range.")]
@@ -59,14 +69,6 @@ public class RangeCommand : Command<RangeCommand.Settings>
         var startDate = DateTime.Parse(settings.StartDate);
         var endDate = DateTime.Parse(settings.EndDate);
         settings.GetRange = true;
-        var url =
-            Configure.Configuration.BaseURL
-            + Configure.Configuration.History.Replace("{date}", settings.StartDate)
-            + Configure.Configuration.AppId
-            + "&symbols="
-            + settings.Symbols
-            + "&base="
-            + settings.BaseSymbol;
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
@@ -99,9 +101,9 @@ public class RangeCommand : Command<RangeCommand.Settings>
                     Thread.Sleep(delay);
                 }
                 var url =
-                    Configure.Configuration.BaseURL
-                    + Configure.Configuration.History
-                    + Configure.Configuration.AppId
+                    _config.BaseUrl
+                    + _config.History
+                    + "?app_id=" + _config.AppId
                     + "&symbols="
                     + settings.Symbols
                     + "&base="
@@ -123,21 +125,21 @@ public class RangeCommand : Command<RangeCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Calling WebAPI URL: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                    $"[red bold]Calling WebAPI URL: [/][blue]{url}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{Configure.Configuration.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_connectionString}[/]"
                                 )
                         );
                         Update(
@@ -150,28 +152,28 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{Configure.Configuration.History}[/]"
+                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{Configure.Configuration.Latest}[/]"
+                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{Configure.Configuration.Usage}[/]"
+                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
                             )
                     );
                     Update(
@@ -230,7 +232,8 @@ public class RangeCommand : Command<RangeCommand.Settings>
                         url,
                         settings.StartDate,
                         settings.EndDate,
-                        settings.Save
+                        settings.Save,
+                        _connectionString
                     );
                 }
                 Update(
@@ -252,7 +255,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                     70,
                                     () =>
                                         titleTable.AddRow(
-                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                         )
                                 );
                             }
@@ -263,7 +266,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                         70,
                                         () =>
                                             titleTable.AddRow(
-                                                $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                                $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                             )
                                     );
                             }

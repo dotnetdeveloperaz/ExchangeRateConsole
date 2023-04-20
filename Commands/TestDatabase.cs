@@ -1,12 +1,21 @@
-using System.ComponentModel;
-using Spectre.Console;
-using Spectre.Console.Cli;
+using ExchangeRateConsole.Models;
 using MySqlConnector;
+using System.ComponentModel;
 
 namespace ExchangeRateConsole.Commands;
 
 public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
 {
+    private readonly string _connectionString;
+    //private ILogger eventSource { get; }
+
+    //    public TestDatabaseCommand(IConfigurationSection config, ILogger<Program> eventSource)
+    public TestDatabaseCommand(ConnectionStrings ConnectionString)
+    {
+        _connectionString = ConnectionString.DefaultDB;
+        // _ = eventSource ?? throw new ArgumentNullException(nameof(eventSource));
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Web API Status.")]
@@ -41,6 +50,7 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
+
         // Animate
         AnsiConsole
             .Live(titleTable)
@@ -60,16 +70,16 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
                 Update(70, () =>
                     titleTable.AddRow(
                         $":hourglass_not_done:[red bold] Testing Connection...[/]"));
-                var conn = new MySqlConnection(Configure.Configuration.DefaultDB);
+                var conn = new MySqlConnection(_connectionString);
                 try
                 {
                     conn.Open();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                Update(70, () =>
-                            titleTable.AddRow(
-                                $"[red bold]Error Connecting to Database: {ex.Message}"));
+                    Update(70, () =>
+                                titleTable.AddRow(
+                                    $"[red bold]Error Connecting to Database: {ex.Message}[/]"));
                 }
                 conn.Close();
                 Update(70, () =>

@@ -1,15 +1,24 @@
-using System;
-using System.ComponentModel;
-using System.Reflection;
-using Spectre.Console;
-using Spectre.Console.Cli;
-using Newtonsoft.Json;
 using ExchangeRateConsole.Models;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Globalization;
+using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
 public class GetRateCommand : Command<GetRateCommand.Settings>
 {
+    private readonly string _connectionString;
+    private readonly ApiServer _config;
+    private ExchangeRateEventSource _eventSource;
+
+    public GetRateCommand(ApiServer config, ConnectionStrings ConnectionString, ExchangeRateEventSource eventSource)
+    {
+        _config = config;
+        _connectionString = ConnectionString.DefaultDB;
+        _eventSource = eventSource;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Get Rate For Specified Date")]
@@ -57,9 +66,9 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
             settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
         bool skip = Utility.IsHolidayOrWeekend(settings.Date);
         var url =
-            Configure.Configuration.BaseURL
-            + Configure.Configuration.Latest
-            + Configure.Configuration.AppId
+            _config.BaseUrl
+            + _config.Latest
+            + "?app_id=" + _config.AppId
             + "&symbols="
             + settings.Symbols
             + "&base="
@@ -104,21 +113,21 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Calling WebAPI URL: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                    $"[red bold]Calling WebAPI URL: [/][blue]{url}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{Configure.Configuration.AppId.Replace("?app_id=", "")}[/]"
+                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId}[/]"
                                 )
                         );
                         Update(
                             70,
                             () =>
                                 titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{Configure.Configuration.DefaultDB}[/]"
+                                    $"[red bold]Database Connection: [/][blue]{_connectionString}[/]"
                                 )
                         );
                     }
@@ -126,35 +135,35 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{Configure.Configuration.BaseURL}[/]"
+                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{Configure.Configuration.History}[/]"
+                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{Configure.Configuration.Latest}[/]"
+                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{Configure.Configuration.Usage}[/]"
+                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Base Symbol: [/][blue]{Configure.Configuration.BaseSymbol}[/]"
+                                $"[red bold]Base Symbol: [/][blue]{_config.BaseSymbol}[/]"
                             )
                     );
                     Update(
@@ -184,7 +193,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         () => titleTable.AddRow($"[red bold]Holiday Or Weekend: [/][blue]{skip}[/]")
                     );
                 }
-                if(skip)
+                if (skip)
                 {
                     Update(
                         70,
@@ -203,7 +212,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                     exchange = JsonConvert.DeserializeObject<Exchange>(cache);
                 }
                 else
-                    exchange = Utility.GetExchangeRate(url, settings.Save);
+                    exchange = Utility.GetExchangeRate(url, settings.Save, _connectionString);
                 var rates = exchange.rates;
                 Update(
                     70,
@@ -218,20 +227,20 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         {
                             Update(
                                 70,
-                                () =>
-                                    titleTable.AddRow(
-                                        $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                            () =>
+                            titleTable.AddRow(
+                                        $":check_mark:[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                     )
                             );
                         }
                         else
                         {
-                            if(settings.Symbols.Contains(prop.Name))
+                            if (settings.Symbols.Contains(prop.Name))
                                 Update(
                                     70,
                                     () =>
-                                        titleTable.AddRow(
-                                            $":check_mark:[green bold] {prop.Name}    {double.Parse(prop.GetValue(rates).ToString())} - {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2)}...[/]"
+                                    titleTable.AddRow(
+                                            $":check_mark:[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                         )
                                 );
                         }

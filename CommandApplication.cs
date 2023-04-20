@@ -1,15 +1,13 @@
-using Spectre.Console;
-using Spectre.Console.Cli;
 using ExchangeRateConsole.Commands;
 
 namespace ExchangeRateConsole;
 
 public class CommandApplication
 {
-    public static CommandApp Initialize()
+    public static CommandApp Initialize(CommandApp app)
     {
         // Configure Spectre Cli
-        var app = new CommandApp();
+        //var app = new CommandApp();
         app.Configure(config =>
         {
             config

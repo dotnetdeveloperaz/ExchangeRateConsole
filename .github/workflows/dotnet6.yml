@@ -34,3 +34,8 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Setup tmate session
+      if: success() || failure()
+      uses: mxschmitt/action-tmate@v3
+
+

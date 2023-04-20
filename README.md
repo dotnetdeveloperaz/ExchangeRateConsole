@@ -54,13 +54,15 @@ Build the project by running the following in the project folder.
 ``` 
 dotnet build
 ``` 
-To run a simple test, run the following.
+To run a simple test, run the following, specifying the .NET version to run on (net6.0, net7.0, net8.0).
 ``` 
-dotnet run
+dotnet run --framework net6.0
 ```
+*Note:* You can remove multi-framework targeting from ExchangeRateConsole.csproj to target a specific version and omit --framework.
+
 To run a test after you create an account with Open Exchange
 ```
-dotnet run acct
+dotnet run acct --framework net6.0
 ```
 You should see something similar to:
 ```
@@ -84,7 +86,7 @@ You should see something similar to:
 ```
 To test your database connection string, you can run the following:
 ```
-dotnet run testdb
+dotnet run testdb --framework net6.0
 ```
 You should see the following screen:
 ```
