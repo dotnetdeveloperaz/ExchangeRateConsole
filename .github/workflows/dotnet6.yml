@@ -31,7 +31,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --configuration Release --no-restore --framework net6.0
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Setup tmate session
