@@ -58,6 +58,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include=".github\workflows\dotnet6.yml" />
+    <None Include=".github\workflows\dotnet7.yml" />
+    <None Include=".github\workflows\dotnet8.yml" />
     <None Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
