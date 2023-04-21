@@ -48,6 +48,13 @@ mysql -u [user] -p [database name] < ExchangeRates.sql
 Table creation, run ExchangeRates-table.sql
 Stored procedure, run usp_AddExchangeRate.sql
 
+Set your configuration for AppId for the Open Exchange API and database connection string. You can also add them to user secrets.
+```
+dotnet user-secrets init
+dotnet user-secrets set "AppId" "Your AppId"
+dotnet user-secrets set "ConnectionStrings:DefaultDB" "<Your database connection string>
+```
+
 Build the project by running the following in the project folder.
 ``` 
 dotnet build
