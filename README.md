@@ -51,7 +51,7 @@ Stored procedure, run usp_AddExchangeRate.sql
 Set your configuration for AppId for the Open Exchange API and database connection string. You can also add them to user secrets.
 ```
 dotnet user-secrets init
-dotnet user-secrets set "AppId" "Your AppId"
+dotnet user-secrets set "ApiServer:AppId" "Your AppId"
 dotnet user-secrets set "ConnectionStrings:DefaultDB" "<Your database connection string>
 ```
 
