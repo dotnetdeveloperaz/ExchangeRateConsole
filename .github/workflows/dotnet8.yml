@@ -28,8 +28,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.100-preview.3.23178.7
+    - name: Clean
+      run: dotnet clean
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --no-cache
     - name: Build
       run: dotnet build --configuration Release --no-restore --framework net8.0
     - name: Test
