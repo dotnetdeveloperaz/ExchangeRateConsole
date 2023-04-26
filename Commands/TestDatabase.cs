@@ -1,5 +1,7 @@
 using ExchangeRateConsole.Models;
 using MySqlConnector;
+using Spectre.Console;
+using Spectre.Console.Cli;
 using System.ComponentModel;
 
 namespace ExchangeRateConsole.Commands;

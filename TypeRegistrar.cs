@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console.Cli;
+
 namespace ExchangeRateConsole;
 
 public sealed class TypeRegistrar : ITypeRegistrar

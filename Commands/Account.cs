@@ -1,5 +1,7 @@
 using ExchangeRateConsole.Models;
 using Newtonsoft.Json;
+using Spectre.Console;
+using Spectre.Console.Cli;
 using System.ComponentModel;
 
 namespace ExchangeRateConsole.Commands;
@@ -147,7 +149,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     .GetAsync(
                         _config.BaseUrl
                             + _config.Usage
-                            + _config.AppId
+                            + "?app_id=" + _config.AppId
                     )
                     .GetAwaiter()
                     .GetResult();

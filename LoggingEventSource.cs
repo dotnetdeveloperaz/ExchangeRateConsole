@@ -1,3 +1,5 @@
+using System.Diagnostics.Tracing;
+
 namespace ExchangeRateConsole;
 
 [EventSource(Name = "Exchange Rate Console")]

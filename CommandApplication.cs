@@ -1,4 +1,5 @@
 using ExchangeRateConsole.Commands;
+using Spectre.Console.Cli;
 
 namespace ExchangeRateConsole;
 

@@ -1,5 +1,7 @@
 using ExchangeRateConsole.Models;
 using Newtonsoft.Json;
+using Spectre.Console;
+using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Reflection;
 

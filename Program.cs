@@ -1,4 +1,10 @@
 ﻿using ExchangeRateConsole.Models;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Configuration;
+using Spectre.Console;
+using Spectre.Console.Cli;
 
 namespace ExchangeRateConsole;
 

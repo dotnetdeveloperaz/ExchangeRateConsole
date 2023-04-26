@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace ExchangeRateConsole;
 
 public class Configure

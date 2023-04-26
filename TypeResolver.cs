@@ -1,3 +1,5 @@
+using Spectre.Console.Cli;
+
 namespace ExchangeRateConsole;
 
 public sealed class TypeResolver : ITypeResolver, IDisposable
