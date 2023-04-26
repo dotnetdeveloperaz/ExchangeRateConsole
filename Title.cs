@@ -14,7 +14,7 @@ class Title
         titleTable.AddColumn(
             new TableColumn(
                 new Markup(
-                    $"[blue bold]Exchange :chart_increasing: Rate Console[/][yellow bold italic] v{version}[/]\r\n[green bold italic]Written By Scott Glasgow[/]"
+                    $"[blue bold]Exchange :chart_increasing: Rate Console[/][yellow bold italic] {version}[/]\r\n[green bold italic]Written By Scott Glasgow[/]"
                 )
             ).Centered()
         );
