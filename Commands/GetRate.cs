@@ -63,18 +63,33 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
 
     public override int Execute(CommandContext context, Settings settings)
     {
+        bool notToday = false;
         settings.GetRate = true;
         if (settings.Date == null)
             settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
+        else
+            notToday = true;
         bool skip = Utility.IsHolidayOrWeekend(settings.Date);
-        var url =
-            _config.BaseUrl
-            + _config.Latest
+        var url = _config.BaseUrl;
+        if (notToday)
+        {
+            url += _config.History
             + "?app_id=" + _config.AppId
             + "&symbols="
             + settings.Symbols
             + "&base="
             + settings.BaseSymbol;
+            url = url.Replace("{date}", settings.Date);
+        }
+        else
+        { 
+            url += _config.Latest
+            + "?app_id=" + _config.AppId
+            + "&symbols="
+            + settings.Symbols
+            + "&base="
+            + settings.BaseSymbol;
+        }
         var titleTable = new Table().Centered();
 
         // Borders
