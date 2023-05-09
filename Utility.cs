@@ -83,7 +83,8 @@ public class Utility
         while (startDate <= endDate)
         {
             var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
-            exchangeRates.Add(GetExchangeRate(url, Save, ConnectionString));
+            if(!IsHolidayOrWeekend(startDate.ToString("yyyy-MM-dd")))
+                exchangeRates.Add(GetExchangeRate(url, Save, ConnectionString));
             startDate = startDate.AddDays(1);
         }
 
