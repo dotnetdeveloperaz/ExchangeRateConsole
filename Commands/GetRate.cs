@@ -229,7 +229,9 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                     exchange = JsonConvert.DeserializeObject<Exchange>(cache);
                 }
                 else
+                {
                     exchange = Utility.GetExchangeRate(url, settings.Save, _connectionString);
+                }
                 var rates = exchange.rates;
                 Update(
                     70,
