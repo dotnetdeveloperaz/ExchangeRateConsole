@@ -29,7 +29,7 @@ jobs:
       with:
         dotnet-version: 6.x.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --runtime net6.0
     - name: Build
       run: dotnet build --configuration Release --no-restore --framework net6.0
     - name: Test
