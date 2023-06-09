@@ -6,6 +6,7 @@
 This was overlooked on the inital design due to me always using a free account which only supports USD, 
 even though I made the code support multi-currency non-free account access. Multi-currency day rate updates are taken in consideration, so if you retrieve for USD, and later for EUR, the update statements in the database update the appropriate record.
 </p>
+
 ## Status
 
 .NET 6
