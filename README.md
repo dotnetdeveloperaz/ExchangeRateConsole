@@ -1,9 +1,11 @@
 <h3 align="center">Exchange Rate Console</h3>
 
 <p>Console to retrieve currency exchange rates. Free accounts do not let you specify the base currency, it is USD. This application does support the ability to pass in any base currency (if you sign up for a plan that supports it) and rate currency symbols. If no symbols are specified, it will return all currency rates against the USD (or the specified base current).
-    <br> 
 </p>
-
+<p>June 9,2023: Updated database and code to support storing base currency that exchange rates are retrieved for. 
+This was overlooked on the inital design due to me always using a free account which only supports USD, 
+even though I made the code support multi-currency non-free account access. Multi-currency day rate updates are taken in consideration, so if you retrieve for USD, and later for EUR, the update statements in the database update the appropriate record.
+</p>
 ## Status
 
 .NET 6
