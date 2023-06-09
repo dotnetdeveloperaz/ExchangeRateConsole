@@ -100,6 +100,7 @@ public class Utility
             if (prop.GetValue(rates).ToString() != "0")
             {
                 var Symbol = prop.Name;
+                var BaseSymbol = ExchangeRate.@base;
                 var Rate = double.Parse(prop.GetValue(rates).ToString());
                 var RateDate = ExchangeRate.RateDate.ToString("yyyy-MM-dd");
 
@@ -110,6 +111,7 @@ public class Utility
                 {
                     sqlConnection.Open();
                     sqlCommand.Parameters.AddWithValue("symbol", Symbol);
+                    sqlCommand.Parameters.AddWithValue("baseSymbol", BaseSymbol);
                     sqlCommand.Parameters.AddWithValue("rate", Rate);
                     sqlCommand.Parameters.AddWithValue("ratedate", RateDate);
                     var recs = sqlCommand.ExecuteNonQuery();

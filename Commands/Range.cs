@@ -240,7 +240,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                 }
                 Update(
                     70,
-                    () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s)...[/]")
+                    () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s) Using Base Currency {exchanges[0].@base}...[/]")
                 );
 
                 foreach (var exchange in exchanges)

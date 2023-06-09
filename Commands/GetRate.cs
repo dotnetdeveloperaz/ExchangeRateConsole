@@ -235,7 +235,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                 var rates = exchange.rates;
                 Update(
                     70,
-                    () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s)...[/]")
+                    () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s) Using Base Currency {exchange.@base}...[/]")
                 );
 
                 foreach (PropertyInfo prop in rates.GetType().GetProperties())
