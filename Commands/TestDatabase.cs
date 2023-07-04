@@ -20,7 +20,7 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
 
     public class Settings : CommandSettings
     {
-        [Description("Get Web API Status.")]
+        [Description("Test Database Configuration.")]
         [DefaultValue(false)]
         public bool DoTestDatabase { get; set; }
 

@@ -61,7 +61,7 @@ public class CommandApplication
 
             config
                 .AddCommand<TestDatabaseCommand>("testdb")
-                .WithDescription("Tests The Database Connection.")
+                .WithDescription("Tests The Database Configuration.")
                 .WithExample(new[] { "testdb", "--debug", "--hidden" });
 #if DEBUG
             config.PropagateExceptions();
