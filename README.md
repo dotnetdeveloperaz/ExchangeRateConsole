@@ -15,7 +15,7 @@ even though I made the code support multi-currency non-free account access. Mult
 .NET 7
 [![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet7.yml)
 
-.NET 8 Preview 6
+.NET 8 Preview 7
 [![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml)
 
 ## Buy Me A Coffee
@@ -37,7 +37,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-- .NET 6, 7, or 8 preview (1 thru 4)
+- .NET 6, 7, or 8 preview (1 thru 7)
 - Account with <a target="_blank" href="https://openexchangerates.org/api/">Open Exchange Rates</a> (Free accounts with 1,000 calls per month available)
 - MariaDB (or MySql)
 
