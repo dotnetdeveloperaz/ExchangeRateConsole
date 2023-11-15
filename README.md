@@ -15,7 +15,7 @@ even though I made the code support multi-currency non-free account access. Mult
 .NET 7
 [![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet7.yml)
 
-.NET 8 Preview 7
+.NET 8 
 [![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml)
 
 ## Buy Me A Coffee
@@ -37,7 +37,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-- .NET 6, 7, or 8 preview (1 thru 7)
+- .NET 6, 7, or 8.
 - Account with <a target="_blank" href="https://openexchangerates.org/api/">Open Exchange Rates</a> (Free accounts with 1,000 calls per month available)
 - MariaDB (or MySql)
 
@@ -62,15 +62,15 @@ Build the project by running the following in the project folder.
 ``` 
 dotnet build
 ``` 
-To run a simple test, run the following, specifying the .NET version to run on (net6.0, net7.0, net8.0).
+To run a simple test, run the following, specifying the .NET version to run on (net6.0, net7.0, net8.0). If you will target a single .NET framework, just change the project file for a single framework version.
 ``` 
-dotnet run --framework net6.0
+dotnet run --framework net8.0
 ```
 *Note:* You can remove multi-framework targeting from ExchangeRateConsole.csproj to target a specific version and omit --framework.
 
 To run a test after you create an account with Open Exchange
 ```
-dotnet run acct --framework net6.0
+dotnet run acct --framework net8.0
 ```
 You should see something similar to:
 ```
@@ -94,7 +94,7 @@ You should see something similar to:
 ```
 To test your database connection string, you can run the following:
 ```
-dotnet run testdb --framework net6.0
+dotnet run testdb --framework net8.0
 ```
 You should see the following screen:
 ```
@@ -178,6 +178,6 @@ COMMANDS:
 ### Built Using <a name = "built_using"></a>
 
 - [MariaDB](https://www.mariadb.com/) - Database (MySQL should be compatible as well)
-- [.NET 6, 7 and 8 preview](https://https://dotnet.microsoft.com/) - Application Framework
+- [.NET 6, 7 and 8](https://https://dotnet.microsoft.com/) - Application Framework
 - [Exchange Rate Web Api](https://openexchangerates.org/)
 - [Spectre Console and Spectra Cli](https://spectreconsole.net/)
