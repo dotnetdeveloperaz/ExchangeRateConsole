@@ -120,11 +120,9 @@ public class Utility
                 {
                     //Console.WriteLine($"Exception: {ex.Message}");
                     /// TODO
-                    // We need to add error bubble up to the caller
-                    // in the case this is the date range call so
-                    // that we can save the results for later saving
-                    // to avoid doubling up on the webapi call to the
-                    // third party.
+                    // We need to load cache file then rewrite it with new data.
+                    // This currently is in an incorrect format for restore.
+
                     string result = JsonConvert.SerializeObject(ExchangeRate, Formatting.Indented);
                     File.AppendAllText($"ExchangeRate.cache", result);
                     return;
