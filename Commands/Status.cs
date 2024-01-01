@@ -4,31 +4,16 @@ using Spectre.Console.Cli;
 
 namespace ExchangeRateConsole.Commands;
 
-public class StatusCommand : Command<StatusCommand.Settings>
+public class StatusCommand : AsyncCommand<StatusCommand.Settings>
 {
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
         [Description("Get Web API Status.")]
         [DefaultValue(false)]
         public bool GetStatus { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Displays Fake Data Instead Of Calling WebAPI")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.GetStatus = true;
         AnsiConsole.Write(

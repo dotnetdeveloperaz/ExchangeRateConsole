@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
-public class GetRateCommand : Command<GetRateCommand.Settings>
+public class GetRateCommand : AsyncCommand<GetRateCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _config;
@@ -21,55 +21,22 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         _eventSource = eventSource;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : RateCommandSettings
     {
         [Description("Get Rate For Specified Date")]
         [DefaultValue(false)]
         public bool GetRate { get; set; }
-
-        [CommandOption("--date <YYYY-MM-DD>")]
-        [Description("Date To Get Rate(s) For")]
-        public string Date { get; set; }
-
-        [CommandOption("--base <Symbol>")]
-        [Description("Base Symbol To Use To Convert From")]
-        [DefaultValue("USD")]
-        public string BaseSymbol { get; set; }
-
-        [CommandOption("--symbols <EUR>")]
-        [Description("Exchange Rate(s) To Get")]
-        public string Symbols { get; set; }
-
-        [CommandOption("--save")]
-        [Description("Save Results")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Displays Data Without Calling Web API")]
-        [DefaultValue(false)]
-        public bool IsFake { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         bool notToday = false;
         settings.GetRate = true;
-        if (settings.Date == null)
-            settings.Date = DateTime.Now.ToString("yyyy-MM-dd");
+        if (settings.StartDate == null)
+            settings.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
         else
             notToday = true;
-        bool skip = Utility.IsHolidayOrWeekend(settings.Date);
+        bool skip = Utility.IsHolidayOrWeekend(settings.StartDate);
         var url = _config.BaseUrl;
         if (notToday)
         {
@@ -79,7 +46,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
             + settings.Symbols
             + "&base="
             + settings.BaseSymbol;
-            url = url.Replace("{date}", settings.Date);
+            url = url.Replace("{date}", settings.StartDate);
         }
         else
         { 
@@ -108,12 +75,12 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
         titleTable.Expand();
 
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(titleTable)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -191,7 +158,7 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                         70,
                         () =>
                             titleTable.AddRow(
-                                $"[red bold]Date To Get Rate(s): [/][blue]{settings.Date}[/]"
+                                $"[red bold]Date To Get Rate(s): [/][blue]{settings.StartDate}[/]"
                             )
                     );
                     Update(
@@ -214,13 +181,13 @@ public class GetRateCommand : Command<GetRateCommand.Settings>
                 {
                     Update(
                         70,
-                        () => titleTable.Columns[0].Footer($":stop_sign: [red bold]Skipping Holiday Or Weekend: [/][blue]{settings.Date}[/]")
+                        () => titleTable.Columns[0].Footer($":stop_sign: [red bold]Skipping Holiday Or Weekend: [/][blue]{settings.StartDate}[/]")
                     );
                     return;
                 }
                 Update(
                     70,
-                    () => titleTable.AddRow($"[red bold]Retrieving Exchange Rates For {settings.Date}[/]")
+                    () => titleTable.AddRow($"[red bold]Retrieving Exchange Rates For {settings.StartDate}[/]")
                 );
                 Exchange exchange;
                 if (settings.IsFake)

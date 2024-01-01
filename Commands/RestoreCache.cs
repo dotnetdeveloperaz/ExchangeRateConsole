@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
-public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
+public class RestoreCacheCommand : AsyncCommand<RestoreCacheCommand.Settings>
 {
     private readonly ApiServer _config;
     private readonly string _connectionString;
@@ -20,24 +20,14 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
         _eventSource = eventSource;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
         [Description("Restore Cache.")]
         [DefaultValue(false)]
         public bool RestoreCache { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         var titleTable = new Table().Centered();
         // Borders
@@ -55,12 +45,12 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(titleTable)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -133,12 +123,12 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
 
                 Update(70, () =>
                     titleTable.AddRow(
-                        $":hourglass_not_done:[red bold] Loading Cache File...[/]"));
+                        $"[red bold]Loading Cache File...[/]"));
                 string cache = File.ReadAllText("ExchangeRate.cache");
                 var exchanges = JsonConvert.DeserializeObject<List<Exchange>>(cache);
                 Update(70, () =>
                             titleTable.AddRow(
-                                ":check_mark:[green bold] Cache File Loaded[/]"));
+                                "[green bold]Cache File Loaded[/]"));
                 foreach (var exchange in exchanges)
                 {
                     Utility.SaveRate(exchange, _connectionString);
@@ -153,7 +143,7 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                                 70,
                                 () =>
                                     titleTable.AddRow(
-                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00000.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00000.000000")}[/]"
+                                            $"[green bold]{prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00000.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00000.000000")}[/]"
                                     )
                             );
                         }
@@ -167,17 +157,17 @@ public class RestoreCacheCommand : Command<RestoreCacheCommand.Settings>
                 }
                 Update(70, () =>
                             titleTable.AddRow(
-                                ":hourglass_not_done:[red bold] Cleaning Up Cache[/]"));
+                                "[red bold]Cleaning Up Cache[/]"));
                 File.Delete("ExchangeRate.cache");
 
                 Update(70, () =>
                             titleTable.AddRow(
-                                ":check_mark:[green bold] Cache Cleared[/]"));
+                                "[green bold]Cache Cleared[/]"));
                 Update(
                     70,
                     () =>
                         titleTable.Columns[0].Footer(
-                            $":check_mark:[green bold] Restore Process Complete[/]"
+                            $"[green bold]Restore Process Complete[/]"
                         )
                 );
             });

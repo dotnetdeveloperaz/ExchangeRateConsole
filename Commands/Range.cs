@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
-public class RangeCommand : Command<RangeCommand.Settings>
+public class RangeCommand : AsyncCommand<RangeCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _config;
@@ -21,52 +21,14 @@ public class RangeCommand : Command<RangeCommand.Settings>
         _eventSource = eventSource;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : RateCommandSettings
     {
         [Description("Get Rates For A Date Range.")]
         [DefaultValue(false)]
         public bool GetRange { get; set; }
-
-        [CommandOption("--start <startdate>")]
-        [Description("Start Date.")]
-        public string StartDate { get; set; }
-
-        [CommandOption("--end <enddate>")]
-        [Description("End Date")]
-        public string EndDate { get; set; }
-
-        [CommandOption("--base <Symbol>")]
-        [Description("Base Symbol To Use To Convert From")]
-        [DefaultValue("USD")]
-        public string BaseSymbol { get; set; }
-
-        [CommandOption("--symbols <Symbols>")]
-        [Description("Symbol(s) To Get Rate For")]
-        [DefaultValue("")]
-        public string Symbols { get; set; }
-
-        [CommandOption("--save")]
-        [Description("Save Results")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Displays Fake Data Instead Of Calling WebAPI")]
-        [DefaultValue(false)]
-        public bool IsFake { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         var startDate = DateTime.Parse(settings.StartDate);
         var endDate = DateTime.Parse(settings.EndDate);
@@ -89,12 +51,12 @@ public class RangeCommand : Command<RangeCommand.Settings>
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(titleTable)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Bottom)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -240,7 +202,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                 }
                 Update(
                     70,
-                    () => titleTable.AddRow($":check_mark:[green bold] Retrieved Rate(s) Using Base Currency {exchanges[0].@base}...[/]")
+                    () => titleTable.AddRow($"[green bold] Retrieved Rate(s) Using Base Currency {exchanges[0].@base}...[/]")
                 );
 
                 foreach (var exchange in exchanges)
@@ -257,7 +219,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                     70,
                                     () =>
                                         titleTable.AddRow(
-                                            $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                            $"[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                         )
                                 );
                             }
@@ -268,7 +230,7 @@ public class RangeCommand : Command<RangeCommand.Settings>
                                         70,
                                         () =>
                                             titleTable.AddRow(
-                                                $":check_mark:[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                                $":[green bold] {prop.Name}      {date}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
                                             )
                                     );
                             }

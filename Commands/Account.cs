@@ -1,12 +1,12 @@
-using ExchangeRateConsole.Models;
-using Newtonsoft.Json;
+using System.ComponentModel;
+using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using System.ComponentModel;
+using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole.Commands;
 
-public class AccountCommand : Command<AccountCommand.Settings>
+public class AccountCommand : AsyncCommand<AccountCommand.Settings>
 {
     private readonly ApiServer _config;
     private readonly string _connectionString;
@@ -19,29 +19,14 @@ public class AccountCommand : Command<AccountCommand.Settings>
         _eventSource = eventSource;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
         [Description("Get Account Statistics.")]
         [DefaultValue(false)]
         public bool GetAccount { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Displays Fake Data Instead Of Calling WebAPI")]
-        [DefaultValue(false)]
-        public bool Fake { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.GetAccount = true;
         var titleTable = new Table().Centered();
@@ -57,12 +42,12 @@ public class AccountCommand : Command<AccountCommand.Settings>
         titleTable.Expand();
         Account account;
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(titleTable)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -141,21 +126,17 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     70,
                     () =>
                         titleTable.AddRow(
-                            $":hourglass_not_done:[red bold] Calling API To Get Account Details...[/]"
+                            $"[red bold] Calling API To Get Account Details...[/]"
                         )
                 );
-                var client = new HttpClient();
-                var response = client
-                    .GetAsync(
-                        _config.BaseUrl
-                            + _config.Usage
-                            + "?app_id=" + _config.AppId
-                    )
-                    .GetAwaiter()
-                    .GetResult();
-                var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                /*              
+                                var client = new HttpClient();
+                                var response = await client.GetAsync(_config.BaseUrl + _config.Usage + "?app_id=" + _config.AppId);
+                                var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                account = JsonConvert.DeserializeObject<Account>(info);
+                                account = JsonConvert.DeserializeObject<Account>(info);
+                */
+                account = await GetAccountAsync(_config.BaseUrl + _config.Usage + "?app_id=" + _config.AppId);
                 var data = account.data;
                 var plan = data.plan;
                 var usage = data.usage;
@@ -164,7 +145,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     70,
                     () =>
                         titleTable.AddRow(
-                            $":check_mark:[green bold] Retrieved Account Details...[/]"
+                            $"[green bold] Retrieved Account Details...[/]"
                         )
                 );
                 Update(70, () => titleTable.AddRow($"[yellow bold]    Plan: {plan.name}[/]"));
@@ -222,4 +203,20 @@ public class AccountCommand : Command<AccountCommand.Settings>
             });
         return 0;
     }
+    private static async Task<Account> GetAccountAsync(string url)
+    {
+        Account account;
+        using (HttpClient client = new HttpClient())
+        {
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url))
+            {
+                HttpResponseMessage response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadAsStreamAsync();
+                account = await JsonSerializer.DeserializeAsync<Account>(result);
+            }
+        }
+        return account;
+    }
+
 }
