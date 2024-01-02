@@ -3,18 +3,19 @@ using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Models;
+using System.Reflection;
 
 namespace ExchangeRateConsole.Commands;
 
 public class AccountCommand : AsyncCommand<AccountCommand.Settings>
 {
-    private readonly ApiServer _config;
+    private readonly ApiServer _apiServer;
     private readonly string _connectionString;
     private ExchangeRateEventSource _eventSource;
 
     public AccountCommand(ApiServer config, ConnectionStrings ConnectionString, ExchangeRateEventSource eventSource)
     {
-        _config = config;
+        _apiServer = config;
         _connectionString = ConnectionString.DefaultDB;
         _eventSource = eventSource;
     }
@@ -29,6 +30,13 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.GetAccount = true;
+        string url = _apiServer.BaseUrl + _apiServer.Usage + "?app_id=" + _apiServer.AppId;
+        if (settings.Debug)
+        {
+            if (!DebugDisplay.Print(settings, _apiServer, _connectionString, url))
+                return 0;
+        }
+
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
@@ -40,7 +48,7 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
         titleTable.BorderColor(Color.Blue);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
-        Account account;
+        Account account = new();
         // Animate
         await AnsiConsole
             .Live(titleTable)
@@ -55,110 +63,49 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
-
-                if (settings.Debug)
+                string msg = settings.IsFake ? "Loading Sample Data" : "Calling API";
+                Update(
+                    70,
+                    () =>
+                        titleTable.AddRow(
+                            $"[red bold] {msg} To Get Account Details...[/]"
+                        )
+                );
+                // Need to add check for IsFake and handle
+                if (!settings.IsFake)
+                    account = await GetAccountAsync(url);
+                else
                 {
-                    if (settings.ShowHidden)
+                    string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    string file = Path.Combine(path, "Account.sample");
+                    if (File.Exists(file))
                     {
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId.Replace("?app_id=", "")}[/]"
-                                )
-                        );
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $"[red bold]Database: [/][blue]{_connectionString}[/]"
-                                )
-                        );
+                        var json = File.ReadAllText(file);
+                        account = JsonSerializer.Deserialize<Account>(json);
                     }
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Base Symbol: [/][blue]{_config.BaseSymbol}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () => titleTable.AddRow($"[red bold]Debug: [/][blue]{settings.Debug}[/]")
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Show Secret: [/][blue]{settings.ShowHidden}[/]"
-                            )
-                    );
                 }
+                var data = account.Data;
+                var plan = data.Plan;
+                var usage = data.Usage;
+                var features = plan.Features;
                 Update(
                     70,
                     () =>
                         titleTable.AddRow(
-                            $"[red bold] Calling API To Get Account Details...[/]"
+                            $"[green bold]Retrieved Account Details...[/]"
                         )
                 );
-                /*              
-                                var client = new HttpClient();
-                                var response = await client.GetAsync(_config.BaseUrl + _config.Usage + "?app_id=" + _config.AppId);
-                                var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-
-                                account = JsonConvert.DeserializeObject<Account>(info);
-                */
-                account = await GetAccountAsync(_config.BaseUrl + _config.Usage + "?app_id=" + _config.AppId);
-                var data = account.data;
-                var plan = data.plan;
-                var usage = data.usage;
-                var features = plan.features;
+                Update(70, () => titleTable.AddRow($"[yellow bold]    Plan: {plan.Name}[/]"));
                 Update(
                     70,
                     () =>
                         titleTable.AddRow(
-                            $"[green bold] Retrieved Account Details...[/]"
-                        )
-                );
-                Update(70, () => titleTable.AddRow($"[yellow bold]    Plan: {plan.name}[/]"));
-                Update(
-                    70,
-                    () =>
-                        titleTable.AddRow(
-                            $"[yellow bold]    Specify Base Symbols: {features.@base}[/]"
+                            $"[yellow bold]    Specify Base Symbols: {features.@Base}[/]"
                         )
                 );
                 Update(
                     70,
-                    () => titleTable.AddRow($"[yellow bold]    Symbols: {features.symbols}[/]")
+                    () => titleTable.AddRow($"[yellow bold]    Symbols: {features.Symbols}[/]")
                 );
                 Update(
                     70,
@@ -167,37 +114,37 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                 );
                 Update(
                     70,
-                    () => titleTable.AddRow($"[yellow bold]    Convert: {features.convert}[/]")
+                    () => titleTable.AddRow($"[yellow bold]    Convert: {features.Convert}[/]")
                 );
-                Update(70, () => titleTable.AddRow($"[yellow bold]    Quota: {plan.quota}[/]"));
+                Update(70, () => titleTable.AddRow($"[yellow bold]    Quota: {plan.Quota}[/]"));
                 Update(
                     70,
-                    () => titleTable.AddRow($"[yellow bold]    Requests Made: {usage.requests}[/]")
+                    () => titleTable.AddRow($"[yellow bold]    Requests Made: {usage.Requests}[/]")
                 );
                 Update(
                     70,
                     () =>
                         titleTable.AddRow(
-                            $"[yellow bold]    Remaining: {usage.requests_remaining}[/]"
+                            $"[yellow bold]    Remaining: {usage.RequestsRemaining}[/]"
                         )
                 );
                 Update(
                     70,
                     () =>
-                        titleTable.AddRow($"[yellow bold]    Days Elapsed: {usage.days_elapsed}[/]")
+                        titleTable.AddRow($"[yellow bold]    Days Elapsed: {usage.DaysElapsed}[/]")
                 );
                 Update(
                     70,
                     () =>
                         titleTable.AddRow(
-                            $"[yellow bold]    Days Remaining: {usage.days_remaining}[/]"
+                            $"[yellow bold]    Days Remaining: {usage.DaysRemaining}[/]"
                         )
                 );
                 Update(
                     70,
                     () =>
                         titleTable.AddRow(
-                            $"[yellow bold]    Daily Average: {usage.daily_average}[/]"
+                            $"[yellow bold]    Daily Average: {usage.DailyAverage}[/]"
                         )
                 );
             });
