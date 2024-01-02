@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace ExchangeRateConsole.Models;
 
@@ -35,6 +35,6 @@ public class LogLevel
     public string Default { get; set; }
     public string Microsoft { get; set; }
 
-    [JsonPropertyAttribute("Microsoft.Hosting.Lifetime")]
+    [JsonPropertyName("Microsoft.Hosting.Lifetime")]
     public string MicrosoftHostingLifetime { get; set; }
 }
