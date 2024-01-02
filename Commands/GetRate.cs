@@ -1,10 +1,10 @@
-using ExchangeRateConsole.Models;
-using Newtonsoft.Json;
-using Spectre.Console;
-using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using System.Text.Json;
+using Spectre.Console;
+using Spectre.Console.Cli;
+using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole.Commands;
 
@@ -57,6 +57,12 @@ public class GetRateCommand : AsyncCommand<GetRateCommand.Settings>
             + "&base="
             + settings.BaseSymbol;
         }
+        if (settings.Debug)
+        {
+            if (!DebugDisplay.Print(settings, _config, _connectionString, url))
+                return 0;
+
+        }
         var titleTable = new Table().Centered();
 
         // Borders
@@ -89,94 +95,6 @@ public class GetRateCommand : AsyncCommand<GetRateCommand.Settings>
                     Thread.Sleep(delay);
                 }
 
-                if (settings.Debug)
-                {
-                    if (settings.ShowHidden)
-                    {
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $"[red bold]Calling WebAPI URL: [/][blue]{url}[/]"
-                                )
-                        );
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $"[red bold]WebAPI AppId: [/][blue]{_config.AppId}[/]"
-                                )
-                        );
-                        Update(
-                            70,
-                            () =>
-                                titleTable.AddRow(
-                                    $"[red bold]Database Connection: [/][blue]{_connectionString}[/]"
-                                )
-                        );
-                    }
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Base Url: [/][blue]{_config.BaseUrl}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]History Url: [/][blue]{_config.History}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Latest Url: [/][blue]{_config.Latest}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Usage Url: [/][blue]{_config.Usage}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Base Symbol: [/][blue]{_config.BaseSymbol}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () => titleTable.AddRow($"[red bold]Debug: [/][blue]{settings.Debug}[/]")
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Date To Get Rate(s): [/][blue]{settings.StartDate}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () => titleTable.AddRow($"[red bold]Save: [/][blue]{settings.Save}[/]")
-                    );
-                    Update(
-                        70,
-                        () =>
-                            titleTable.AddRow(
-                                $"[red bold]Show Secret: [/][blue]{settings.ShowHidden}[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () => titleTable.AddRow($"[red bold]Holiday Or Weekend: [/][blue]{skip}[/]")
-                    );
-                }
                 if (skip)
                 {
                     Update(
@@ -193,11 +111,11 @@ public class GetRateCommand : AsyncCommand<GetRateCommand.Settings>
                 if (settings.IsFake)
                 {
                     string cache = File.ReadAllText("OneDayRate.sample");
-                    exchange = JsonConvert.DeserializeObject<Exchange>(cache);
+                    exchange = JsonSerializer.Deserialize<Exchange>(cache);
                 }
                 else
                 {
-                    exchange = Utility.GetExchangeRate(url, settings.Save, _connectionString);
+                    exchange = await Utility.GetExchangeRateAsync(url, settings.Save, _connectionString);
                 }
                 var rates = exchange.rates;
                 Update(

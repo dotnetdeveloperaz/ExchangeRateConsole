@@ -18,6 +18,7 @@ public class ApiServer
     public string History { get; set; }
     public string Latest { get; set; }
     public string Usage { get; set; }
+    public string CacheFile { get; set; }
 }
 
 public class ConnectionStrings

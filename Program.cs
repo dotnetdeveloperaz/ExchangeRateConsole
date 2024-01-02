@@ -37,7 +37,9 @@ class Program
         var database = config.GetSection("ConnectionStrings");
         config = config.GetSection("ApiServer");
         var services = new ServiceCollection();
-        services.AddSingleton(new ApiServer() { AppId = config.GetSection("AppId").Value, BaseUrl = config.GetSection("BaseUrl").Value, BaseSymbol = config.GetSection("BaseSymbol").Value, History = config.GetSection("History").Value, Latest = config.GetSection("Latest").Value, Usage = config.GetSection("Usage").Value });
+        services.AddSingleton(new ApiServer() { AppId = config.GetSection("AppId").Value, BaseUrl = config.GetSection("BaseUrl").Value,
+            BaseSymbol = config.GetSection("BaseSymbol").Value, History = config.GetSection("History").Value, Latest = config.GetSection("Latest").Value,
+            CacheFile = config.GetSection("CacheFile").Value, Usage = config.GetSection("Usage").Value });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
         services.AddLogging(loggingBuilder =>
       {

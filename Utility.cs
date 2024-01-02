@@ -1,6 +1,6 @@
 using System.Data;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json;
 using MySqlConnector;
 using PublicHoliday;
 using ExchangeRateConsole.Models;
@@ -54,21 +54,20 @@ public class Utility
             return false;
     }
 
-    public static Exchange GetExchangeRate(string Uri, bool Save, string ConnectionString)
+    public static async Task<Exchange> GetExchangeRateAsync(string Uri, bool Save, string ConnectionString)
     {
         var client = new HttpClient();
-        var response = client.GetAsync(Uri).GetAwaiter().GetResult();
-        var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        var exchangeRate = JsonConvert.DeserializeObject<Exchange>(info);
+        var response = await client.GetAsync(Uri);
+        var info = await response.Content.ReadAsStringAsync();
+        var exchangeRate = JsonSerializer.Deserialize<Exchange>(info);
 
-        // Need to add save functionality.
         if(Save)
-            SaveRate(exchangeRate, ConnectionString);
+            await SaveRateAsync(exchangeRate, ConnectionString);
 
         return exchangeRate;
     }
 
-    public static List<Exchange> GetExchangeRates(
+    public static async Task<List<Exchange>> GetExchangeRatesAsync(
         string Uri,
         string StartDate,
         string EndDate,
@@ -84,14 +83,14 @@ public class Utility
         {
             var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
             if(!IsHolidayOrWeekend(startDate.ToString("yyyy-MM-dd")))
-                exchangeRates.Add(GetExchangeRate(url, Save, ConnectionString));
+                exchangeRates.Add(await GetExchangeRateAsync(url, Save, ConnectionString));
             startDate = startDate.AddDays(1);
         }
 
         return exchangeRates;
     }
 
-    public static void SaveRate(Exchange ExchangeRate, string ConnectionString)
+    public static async Task<bool> SaveRateAsync(Exchange ExchangeRate, string ConnectionString)
     {
         var rates = ExchangeRate.rates;
 
@@ -109,12 +108,12 @@ public class Utility
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 try
                 {
-                    sqlConnection.Open();
+                    await sqlConnection.OpenAsync();
                     sqlCommand.Parameters.AddWithValue("symbol", Symbol);
                     sqlCommand.Parameters.AddWithValue("baseSymbol", BaseSymbol);
                     sqlCommand.Parameters.AddWithValue("rate", Rate);
                     sqlCommand.Parameters.AddWithValue("ratedate", RateDate);
-                    var recs = sqlCommand.ExecuteNonQuery();
+                    var recs = await sqlCommand.ExecuteNonQueryAsync();
                 }
                 catch (MySqlException)
                 {
@@ -123,9 +122,9 @@ public class Utility
                     // We need to load cache file then rewrite it with new data.
                     // This currently is in an incorrect format for restore.
 
-                    string result = JsonConvert.SerializeObject(ExchangeRate, Formatting.Indented);
+                    string result = JsonSerializer.Serialize(ExchangeRate);
                     File.AppendAllText($"ExchangeRate.cache", result);
-                    return;
+                    return false;
                 }
                 finally
                 {
@@ -136,5 +135,6 @@ public class Utility
                 }
             }
         }
+        return true;
     }
 }

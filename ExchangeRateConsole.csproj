@@ -52,7 +52,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="MySqlConnector" Version="2.2.5" />
-		<PackageReference Include="NewtonSoft.Json" Version="13.0.3" />
 		<PackageReference Include="Polly" Version="7.2.3" />
 		<PackageReference Include="PublicHoliday" Version="2.27.0" />
 		<PackageReference Include="Spectre.Console" Version="0.46.0" />
