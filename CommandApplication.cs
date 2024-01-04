@@ -52,7 +52,7 @@ public class CommandApplication
             config
                 .AddCommand<SymbolCommand>("symbol")
                 .WithDescription("List Or Search Currency Symbols")
-                .WithExample(new[] { "symbol", "--search", "<USD>", "--list" });
+                .WithExample(new[] { "symbol", "--search", "<USD>,<EUR>", "--list" });
 #if DEBUG
             config.PropagateExceptions();
             config.ValidateExamples();
