@@ -10,12 +10,18 @@ namespace ExchangeRateConsole.Commands
 {
     public class RateCommandSettings : BaseCommandSettings
     {
+        [Description("Get Rate For Specified Date")]
+        [DefaultValue(false)]
+        public bool GetRate { get; set; }
+
         [CommandOption("--start <YYYY-MM-DD>")]
         [Description("Start Date")]
+        [DefaultValue("")]
         public string StartDate { get; set; }
 
         [CommandOption("--end <YYYY-MM-DD>")]
         [Description("End Date (optional)")]
+        [DefaultValue("")]
         public string EndDate { get; set; }
 
         [CommandOption("--base <Symbol>")]
@@ -31,5 +37,10 @@ namespace ExchangeRateConsole.Commands
         [Description("Save Results")]
         [DefaultValue(false)]
         public bool Save { get; set; }
+
+        [CommandOption("--cache")]
+        [Description("Cache Results To File")]
+        [DefaultValue(false)]
+        public bool Cache { get; set; }
     }
 }

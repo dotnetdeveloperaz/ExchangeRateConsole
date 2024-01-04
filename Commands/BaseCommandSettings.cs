@@ -19,5 +19,10 @@ namespace ExchangeRateConsole.Commands
         [Description("Does Not Call WebApi")]
         [DefaultValue(false)]
         public bool IsFake { get; set; }
+
+        [CommandOption("--appid")]
+        [Description("Overrides The AppId")]
+        [DefaultValue("")]
+        public string OverrideAppId { get; set; }   
     }
 }

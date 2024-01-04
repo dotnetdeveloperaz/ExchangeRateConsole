@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Models;
-using System.Globalization;
 
 namespace ExchangeRateConsole.Commands;
 
@@ -20,9 +20,6 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
 
     public class Settings : RateCommandSettings
     {
-        [Description("Get Rate For Specified Date")]
-        [DefaultValue(false)]
-        public bool GetRate { get; set; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -30,15 +27,17 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
         settings.GetRate = true;
         var url = _config.BaseUrl;
 
-        url += settings.StartDate == null ? _config.Latest : _config.History;
-        if (settings.StartDate == null)
+        url += _config.History;
+        if (settings.StartDate == String.Empty)
             settings.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
-        url = url.Replace("{date}", settings.StartDate) + "?app_id=" 
-            + _config.AppId
-            + "&symbols="
-            + settings.Symbols
-            + "&base="
-            + settings.BaseSymbol;
+
+        url += "?symbols="
+            + settings.Symbols;
+
+        if (settings.OverrideAppId == String.Empty)
+            url += $"&app_id={_config.AppId}";
+        else
+            url += $"&app_id={settings.OverrideAppId}";
 
         if (settings.Debug)
         {
@@ -77,11 +76,35 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                     Thread.Sleep(delay);
                 }
 
-                string msg = settings.EndDate == null ? $"Retrieving Exchanges Rate For {settings.StartDate}" : $"Retrieving Exchange Rate for {settings.StartDate} to {settings.EndDate}";
+                Update(
+                        70,
+                        () =>
+                            table.AddRow(
+                                $"[red bold]Status[/] [green bold]Calculating Non-Weekend/Holiday Dates For {settings.StartDate} to {settings.EndDate}[/]"
+                            )
+                    );
+
+                List<DateTime> days = Utility.GetNumberOfDays(settings.StartDate, settings.EndDate);
+
+                string msg = days.Count == 1 ? $"[green bold]There is {days.Count} Day To Retrieve Rates For...[/]" : $"[green bold]There are {days.Count} Days To Retrieve Rates For...[/]";
+                Update(70, () => table.AddRow(msg));
+
+                if (days.Count < 1)
+                {
+                    Update(70, () => table.Columns[0].Footer(
+                                $"[red bold]Status[/] [green bold]Completed, Nothing Processed. Holiday Or Weekend.[/]"
+                            ));
+                    return;
+                }
+
+
+                Update(70, () => table.Columns[0].Footer($"[green]Calling {_config.BaseUrl}stat For Account Information[/]"));
+
+                msg = settings.EndDate == null ? $"Retrieving Exchanges Rate For {settings.StartDate}" : $"Retrieving Exchange Rate for {settings.StartDate} to {settings.EndDate}";
                 string sampleFile = settings.EndDate == null ? "OneDayRate.sample" : "MultiDayRate.sample";
                 Update(
                     70,
-                    () => table.AddRow($"[red bold]{msg}[/]")
+                    () => table.Columns[0].Header($"[green bold]{msg}[/]")
                 );
                 List<Exchange> exchanges = new();
                 if (settings.IsFake)
@@ -99,28 +122,36 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                 }
                 else
                 {
-                    Exchange exchange = await Utility.GetExchangeRateAsync(url, settings.Save, _connectionString);
-                    exchanges.Add(exchange);
+                    foreach (var day in days)
+                    {
+                        var callingUri = url.Replace("{date}", day.ToString("yyyy-MM-dd"));
+                        Update(70, () => table.Columns[0].Footer($"[green]Calling {callingUri}[/]"));
+                        Exchange exchange = await Utility.GetExchangeRateAsync(callingUri, settings.Save, _connectionString);
+                        exchanges.Add(exchange);
+                    }
                 }
+                if (settings.Cache)
+                    Utility.CacheData(exchanges, "ExchangeRate.cache");
                 foreach (Exchange exchange in exchanges)
                 { 
                     var rates = exchange.rates;
                     Update(
                         70,
-                        () => table.AddRow($"[red bold] Retrieved Rate(s) For {exchange.RateDate} Using Base Currency {exchange.@base}...[/]")
+                        () => table.AddRow($"[red bold]     Retrieved Rate(s) For {exchange.RateDate:yyyy-MM-dd} Using Base Currency {exchange.@base}...[/]")
                     );
 
                     foreach (PropertyInfo prop in rates.GetType().GetProperties())
                     {
                         if (prop.GetValue(rates).ToString() != "0")
                         {
+                            double price = 1 / double.Parse(prop.GetValue(rates).ToString());
                             if (!settings.IsFake)
                             {
                                 Update(
                                     70,
                                 () =>
                                 table.AddRow(
-                                            $"[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                            $"[green bold]     {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("00.00")}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}      USD Cost {price.ToString("C")}[/]"
                                         )
                                 );
                             }
@@ -131,13 +162,13 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                                     if (settings.Symbols.Contains(prop.Name))
                                         Update(70, () =>
                                             table.AddRow(
-                                                $"[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                                $"[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}      USD Cost {price.ToString("C")}[/]"
                                             ));
                                 }
                                 else
                                     Update(70, () =>
                                         table.AddRow(
-                                            $"[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}[/]"
+                                            $"[green bold] {prop.Name}      {Math.Round(double.Parse(prop.GetValue(rates).ToString()), 2).ToString("C", CultureInfo.CurrentCulture)}      {double.Parse(prop.GetValue(rates).ToString()).ToString("00.000000")}      USD Cost {price.ToString("C")}[/]"
                                         ));
                             }
                         }
@@ -158,5 +189,18 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                 );
             });
         return 0;
+    }
+
+    public override ValidationResult Validate(CommandContext context, Settings settings)
+    {
+        if (settings.StartDate == String.Empty)
+            settings.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
+        if (!DateTime.TryParse(settings.StartDate, out _))
+            return ValidationResult.Error($"Invalid date - {settings.StartDate}");
+        if (settings.EndDate == String.Empty)
+            settings.EndDate = DateTime.Now.ToString("yyyy-MM-dd");
+        if (!DateTime.TryParse(settings.EndDate, out _))
+            return ValidationResult.Error($"Invalid date - {settings.EndDate}");
+        return base.Validate(context, settings);
     }
 }

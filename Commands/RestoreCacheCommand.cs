@@ -90,7 +90,7 @@ public class RestoreCacheCommand : AsyncCommand<RestoreCacheCommand.Settings>
 
                 foreach (var exchange in exchanges)
                 {
-                    //Utility.SaveRate(exchange, _connectionString);
+                    await Utility.SaveRateAsync(exchange, _connectionString);
                     var rates = exchange.rates;
                     var date = exchange.RateDate.ToString("MM-dd-yyyy");
 
@@ -115,7 +115,7 @@ public class RestoreCacheCommand : AsyncCommand<RestoreCacheCommand.Settings>
                     }
                 }
                 Update(70, () => titleTable.AddRow("[red bold]Cleaning Up Cache[/]"));
-                //File.Delete("ExchangeRate.cache");
+                File.Delete(file);
 
                 Update(70, () => titleTable.AddRow("[green bold]Cache Cleared[/]"));
                 Update(70, () => titleTable.Columns[0].Footer($"[green bold]Restore Process Complete[/]"));
