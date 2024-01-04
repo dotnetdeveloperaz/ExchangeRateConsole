@@ -49,6 +49,10 @@ public class CommandApplication
                 .AddCommand<TestDatabaseCommand>("testdb")
                 .WithDescription("Tests The Database Configuration.")
                 .WithExample(new[] { "testdb", "--debug", "--hidden" });
+            config
+                .AddCommand<SymbolCommand>("symbol")
+                .WithDescription("List Or Search Currency Symbols")
+                .WithExample(new[] { "symbol", "--search", "<USD>", "--list" });
 #if DEBUG
             config.PropagateExceptions();
             config.ValidateExamples();

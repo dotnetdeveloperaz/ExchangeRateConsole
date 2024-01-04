@@ -131,7 +131,13 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                     }
                 }
                 if (settings.Cache)
+                {
+                    Update(
+                       70,
+                       () => table.AddRow($"[red bold]     Caching Data[/]")
+                   );
                     Utility.CacheData(exchanges, "ExchangeRate.cache");
+                }
                 foreach (Exchange exchange in exchanges)
                 { 
                     var rates = exchange.rates;
