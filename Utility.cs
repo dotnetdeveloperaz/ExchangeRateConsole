@@ -9,44 +9,23 @@ namespace ExchangeRateConsole;
 
 public class Utility
 {
-    private static List<DateTime> listOfDays;
-    private static List<Exchange> exchangeRates;
-
-    public List<DateTime> ListOfDays
+    public static List<DateTime> GetNumberOfDays(string startDate, string endDate)
     {
-        get { return listOfDays; }
-    }
-
-    public List<Exchange> ExchangeRates
-    {
-        get { return exchangeRates; }
-    }
-
-    public static int GetNumberOfDays(DateTime start, DateTime end)
-    {
-        listOfDays = new List<DateTime>();
-        int i = 0;
-        var res = DateTime.Compare(end, DateTime.Now);
+        List<DateTime> dates = new();
+        DateTime start = DateTime.Parse(startDate);
+        DateTime end = DateTime.Parse(endDate);
 
         while (start <= end)
         {
-            bool isHoliday = new USAPublicHoliday().IsPublicHoliday(start);
-            if (
-                !isHoliday
-                && start.DayOfWeek != DayOfWeek.Saturday
-                && start.DayOfWeek != DayOfWeek.Sunday
-            )
-
-                i++;
-            listOfDays.Add(start);
+            if (!IsHolidayOrWeekend(start))
+                dates.Add(start);
             start = start.AddDays(1);
         }
-        return i;
+        return dates;
     }
 
-    public static bool IsHolidayOrWeekend(string Date)
+    public static bool IsHolidayOrWeekend(DateTime date)
     {
-        DateTime date = DateTime.Parse(Date);
         bool isHoliday = new USAPublicHoliday().IsPublicHoliday(date);
         if (isHoliday || date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
             return true;
@@ -61,7 +40,7 @@ public class Utility
         var info = await response.Content.ReadAsStringAsync();
         var exchangeRate = JsonSerializer.Deserialize<Exchange>(info);
 
-        if(Save)
+        if (Save)
             await SaveRateAsync(exchangeRate, ConnectionString);
 
         return exchangeRate;
@@ -78,11 +57,11 @@ public class Utility
         DateTime startDate = DateTime.Parse(StartDate);
         DateTime endDate = DateTime.Parse(EndDate);
 
-        exchangeRates = new List<Exchange>();
+        List<Exchange> exchangeRates = new List<Exchange>();
         while (startDate <= endDate)
         {
             var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
-            if(!IsHolidayOrWeekend(startDate.ToString("yyyy-MM-dd")))
+            if(!IsHolidayOrWeekend(startDate))
                 exchangeRates.Add(await GetExchangeRateAsync(url, Save, ConnectionString));
             startDate = startDate.AddDays(1);
         }
@@ -117,13 +96,6 @@ public class Utility
                 }
                 catch (MySqlException)
                 {
-                    //Console.WriteLine($"Exception: {ex.Message}");
-                    /// TODO
-                    // We need to load cache file then rewrite it with new data.
-                    // This currently is in an incorrect format for restore.
-
-                    string result = JsonSerializer.Serialize(ExchangeRate);
-                    File.AppendAllText($"ExchangeRate.cache", result);
                     return false;
                 }
                 finally
@@ -137,4 +109,25 @@ public class Utility
         }
         return true;
     }
+    public static bool CacheData(List<Exchange> exchanges, string cacheFile)
+    {
+        string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string file = Path.Combine(path, cacheFile);
+        if (File.Exists(file))
+        {
+            var json = File.ReadAllText(file);
+            List<Exchange> cache = JsonSerializer.Deserialize<List<Exchange>>(json);
+            foreach (var exchange in exchanges)
+                cache.Add(exchange);
+            string result = JsonSerializer.Serialize(cache);
+            File.WriteAllText(file, result);
+        }
+        else
+        {
+            string result = JsonSerializer.Serialize(exchanges);
+            File.WriteAllText(file, result);
+        }
+        return true;
+    }
+
 }
