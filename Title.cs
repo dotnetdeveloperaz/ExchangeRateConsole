@@ -23,5 +23,17 @@ class Title
         titleTable.Expand();
 
         AnsiConsole.Write(titleTable);
+
+        string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string file = Path.Combine(path, "ExchangeRate.cache");
+        if (File.Exists(file))
+        {
+            var table = new Table().Centered();
+            table.AddColumn(new TableColumn(new Markup($"[red bold italic]Cache file exists at {path}. Use restore to load to database.[/]").Centered()));
+            table.BorderColor(Color.Red3);
+            table.Border(TableBorder.Rounded);
+            table.Expand();
+            AnsiConsole.Write(table);
+        }
     }
 }
