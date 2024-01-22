@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
+using System.Text;
 
 namespace ExchangeRateConsole.Commands
 {
@@ -81,14 +82,24 @@ namespace ExchangeRateConsole.Commands
                     
                     string msg = settings.Symbol == String.Empty ? "Listing Valid Currency Codes" : $"Searching For Currency Code {settings.Symbol}";
                     Update(70, () => table.AddRow($"[red bold]{msg}[/]"));
-                    string cache = File.ReadAllText("OneDayRate.sample");
-                    List<Exchange> exchange = JsonSerializer.Deserialize<List<Exchange>>(cache);
+                    string cache;
+                    using (StreamReader sr = new StreamReader("OneDayRate.sample"))
+                    {
+                        cache = sr.ReadToEnd();
+                    }
+                    List<Exchange> exchange = await JsonSerializer.DeserializeAsync<List<Exchange>>(new MemoryStream(Encoding.UTF8.GetBytes(cache)));
                     var rates = exchange[0].rates;
 
                     foreach (PropertyInfo prop in rates.GetType().GetProperties())
                     {
-                            if (settings.ListCodes || settings.Symbol.Contains(prop.Name))
-                                Update(70, () => table.AddRow($"[green bold] {prop.Name}[/]"));
+                        if (settings.ListCodes || settings.Symbol.Contains(prop.Name))
+                            Update(70, () => table.AddRow($"[green bold] {prop.Name}[/]"));
+                        // More rows than we want?
+                        if (table.Rows.Count > Console.WindowHeight - 15)
+                        {
+                            // Remove the first one
+                            table.Rows.RemoveAt(0);
+                        }
                     }
 
                     Update(70, () => table.Columns[0].Footer("[green bold]Finished....[/]"));
