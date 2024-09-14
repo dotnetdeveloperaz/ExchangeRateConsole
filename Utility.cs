@@ -109,6 +109,17 @@ public class Utility
         }
         return true;
     }
+
+    public static async Task<bool> SaveRatesAsync(List<Exchange> exchanges, string ConnectionString)
+    {
+        int cnt = 0;
+        foreach (Exchange exchange in exchanges)
+        {
+            if ( await SaveRateAsync(exchange, ConnectionString))
+                cnt++;
+        }
+        return (cnt == exchanges.Count);
+    }
     public static bool CacheData(List<Exchange> exchanges, string cacheFile)
     {
         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
