@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using ExchangeRateConsole.Models;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Commands.Settings;
-using System.Linq;
-using System.Net.Mail;
+using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole.Commands
 {
@@ -26,15 +18,12 @@ namespace ExchangeRateConsole.Commands
 
         public class Settings : BaseCommandSettings
         {
-            [CommandOption("--cachefile")]
-            [Description("Cache File to Use - Override Default")]
-            [DefaultValue(null)]
-            public string CacheFile { get; set; } = null;
 
         }
         public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
         {
             settings.CacheFile ??= _apiServer.CacheFile;
+            int rowSize = _apiServer.CacheFileExists ? 13 : 11;
             if (settings.Debug)
             {
                 if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
@@ -101,7 +90,7 @@ namespace ExchangeRateConsole.Commands
                                     symbols += "and more....";
                             }
                         // More rows than we want?
-                            if (table.Rows.Count > Console.WindowHeight - 13)
+                            if (table.Rows.Count > Console.WindowHeight - rowSize)
                             {
                                 // Remove the first one
                                 table.Rows.RemoveAt(0);
