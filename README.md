@@ -102,12 +102,22 @@ dotnet run testdb --db "<YourConnectionString>"
 ```
 You should see the following screen:
 ```
-╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                          Running Database Connection Configuration Test                          │
-├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ⏳ Testing Connection...                                                                         │
-│ ✔ Connection Successful                                                                         │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────╮
+│                       Exchange Rate Console v3.0                        │
+│                        Written By Scott Glasgow                         │
+╰─────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────╮
+│                   Running Database Configuration Test                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Testing Connection...                                                   │
+│ Connection Made Successfully...                                         │
+│ Verifying Table Exists...                                               │
+│ Verified Table Exists....                                               │
+│ Verifying The 3 Stored Procedures Exist...                              │
+│ Verified 3 Stored Procedures Exist...                                   │
+│ Cleaning up...                                                          │
+│ Database Connection Test Complete                                       │
+╰─────────────────────────────────────────────────────────────────────────╯
 ```
 
 ### Usage <a name="usage"></a>
@@ -117,7 +127,7 @@ The individual commands are:
 ```
 range       Gets exchange rates between two date ranges
 
-getrate     Gets the current rate or for the day specified
+rate     Gets the current rate or for the day specified
 
 view        Views exchange rates from either the cachefile or database using parameters
             passed.
@@ -145,7 +155,9 @@ The available switches are:
 --debug     Available on all commands
             shows configuration data
 --hidden    Available on all commands
-            Shows all secret configuration            
+            Shows all secret configuration
+--fake      Uses fake Data instead of calling the WebApi
+--appid     Overrides the configured OpenExchangeRates AppID
 ```
 
 ```
@@ -154,42 +166,54 @@ dotnet run
 This gives you the following screen.
 
 ```
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                                Exchange Rate Console v3.0                                                │
-│                                                 Written By Scott Glasgow                                                 │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─────────────────────────────────────────────────────────────────────────╮
+│                       Exchange Rate Console v3.0                        │
+│                        Written By Scott Glasgow                         │
+╰─────────────────────────────────────────────────────────────────────────╯
 USAGE:
     ExchangeRateConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    ExchangeRateConsole.dll rate --start YYYY-MM-DD --end YYYY-MM-DD --symbols EUR,TRY --base USD --appid <AppID> --debug 
---hidden --save --cache --fake --appid <AppId>
-    ExchangeRateConsole.dll rate --symbols EUR,TRY --base USD --date YYYY-MM-DD --save --appid AppID --debug --hidden
-    ExchangeRateConsole.dll view --start YYYY-MM-DD --end YYYY-MM-DD --symbols EUR,TRY --base USD --fake --cache --cachefile
-<file> --debug --appid <AppID>
+    ExchangeRateConsole.dll rate --start YYYY-MM-DD --end YYYY-MM-DD 
+--symbols EUR,TRY --base USD --appid <AppID> --debug --hidden --save 
+--cache --fake --appid <AppId>
+    ExchangeRateConsole.dll rate --symbols EUR,TRY --base USD --date 
+YYYY-MM-DD --save --appid AppID --debug --hidden
+    ExchangeRateConsole.dll view --start YYYY-MM-DD --end YYYY-MM-DD 
+--symbols EUR,TRY --base USD --fake --cache --cachefile <file> --debug 
+--appid <AppID>
     ExchangeRateConsole.dll cachestats --cachefile <filename>
-    ExchangeRateConsole.dll testdb --db '<YourDBConnectionString>' --debug --hidden
+    ExchangeRateConsole.dll testdb --db '<YourDBConnectionString>' --debug 
+--hidden
 
 OPTIONS:
     -h, --help    Prints help information
 
 COMMANDS:
-    range         Gets historical Exchange rate(s). Use --save to save to the database.                                     
-                  Weekends and holidays are skipped because markets are closed                                              
-    rate          Gets the current Exchange rate(s). Use --save to save to database. Weekends and holidays are skipped      
-    view          Works like the Range command except it displays data from the configured database or from the configured  
-                  cachefile with --cache. Use with --cachefile </path/filename to override.                                 
-                                                                                                                            
-    cachestats    Displays the cachefile statistics, start and end dates.                                                   
-                  To override configured cache file, use the --cachefile </path/filename> switch.                           
-                                                                                                                            
-    testdb        Tests the configured database connection.                                                                 
-                  Use the --db "<YourConnectionString>" (Quotes Required!) to test connectionstrings for diagnosing.        
-                  This switch is NOT available with any other command.                                                      
-                                                                                                                            
-    restore       Writes data from cache file to database and deletes the cache file after successful completion            
-    account       Gets account information                                                                                  
-    status        Gets WebApi Status   
+    range         Gets historical Exchange rate(s). Use --save to save to  
+                  the database.                                            
+                  Weekends and holidays are skipped because markets are    
+                  closed                                                   
+    rate          Gets the current Exchange rate(s). Use --save to save to 
+                  database. Weekends and holidays are skipped              
+    view          Works like the Range command except it displays data from
+                  the configured database or from the configured cachefile 
+                  with --cache. Use with --cachefile </path/filename to    
+                  override.                                                
+                                                                           
+    cachestats    Displays the cachefile statistics, start and end dates.  
+                  To override configured cache file, use the --cachefile   
+                  </path/filename> switch.                                 
+                                                                           
+    testdb        Tests the configured database connection.                
+                  Use the --db "<YourConnectionString>" (Quotes Required!) 
+                  to test connectionstrings for diagnosing.                
+                  This switch is NOT available with any other command.     
+                                                                           
+    restore       Writes data from cache file to database and deletes the  
+                  cache file after successful completion                   
+    account       Gets account information                                 
+    status        Gets WebApi Status              
 ```
 
 ### Built Using <a name = "built_using"></a>
