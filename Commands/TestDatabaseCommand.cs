@@ -1,37 +1,45 @@
 using System.ComponentModel;
+using System.Data;
 using MySqlConnector;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Models;
+using ExchangeRateConsole.Commands.Settings;
 
 namespace ExchangeRateConsole.Commands;
 
 public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
 {
-    private readonly string _connectionString;
+    private string _defaultDB;
+    private readonly ConnectionStrings _connectionStrings;
     private readonly ApiServer _apiServer;
 
-    public TestDatabaseCommand(ApiServer apiServer, ConnectionStrings ConnectionString)
+    public TestDatabaseCommand(ApiServer apiServer, ConnectionStrings connectionStrings)
     {
         _apiServer = apiServer;
-        _connectionString = ConnectionString.DefaultDB;
+        _connectionStrings = connectionStrings;
+        _defaultDB = connectionStrings.DefaultDB;
     }
+
     public class Settings : BaseCommandSettings
     {
-        [Description("Test Database Configuration.")]
-        [DefaultValue(false)]
-        public bool DoTestDatabase { get; set; }
+        [CommandOption("--db <ConnectionString>")]
+        [Description("Override Configured DB For Testing")]
+        [DefaultValue(null)]
+        public string DBConnectionString { get; set; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        settings.DoTestDatabase = true;
         if (settings.Debug)
         {
-            if (!DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A"))
+            if (!DebugDisplay.Print(settings, _apiServer, _defaultDB, "N/A"))
                 return 0;
 
         }
+        // Database connection string is being overriden, we displayed DEBUG info (if selected), now update the connectionstring used.
+        // Setting this BEFORE DebugDisplay would cause both to have the same values, so it must come after.
+        _defaultDB = settings.DBConnectionString ?? _defaultDB;
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
@@ -40,7 +48,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
         titleTable.AddColumn(
             new TableColumn(
                 new Markup(
-                    "[yellow bold]Running Database Connection Configuration Test[/]"
+                    "[yellow bold]Running Database Configuration Test[/]"
                 ).Centered()
             )
         );
@@ -63,12 +71,38 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     Thread.Sleep(delay);
                 }
 
-                Update(70, () => titleTable.AddRow($"[red bold] Testing Connection...[/]"));
-                var conn = new MySqlConnection(_connectionString);
+                Update(70, () => titleTable.AddRow($"[blue bold]Testing Connection...[/]"));
+                var conn = new MySqlConnection(settings.DBConnectionString);
+                var sqlCommand = new MySqlCommand();
+                sqlCommand.Connection = conn;
+                sqlCommand.CommandType = CommandType.Text;
                 try
                 {
                     await conn.OpenAsync();
-                    Update(70, () => titleTable.AddRow($"[green bold] Connection Made Successfully...[/]"));
+                    Update(70, () => titleTable.AddRow($"[green bold]Connection Made Successfully...[/]"));
+
+                    // Want to add tests to ensure table exists, and both stored procedures exist.
+                    string procs = "SELECT COUNT(ROUTINE_NAME) FROM information_schema.ROUTINES WHERE ROUTINE_NAME = 'usp_AddExchangeRate' "
+                        + "OR ROUTINE_NAME LIKE 'usp_GetExchangeRates%';";
+                    string table = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'ExchangeRates';";
+
+                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying Table Exists...[/]"));
+                    sqlCommand.CommandText = table;
+                    var recs = sqlCommand.ExecuteScalar();
+                    if (recs.ToString() == "1")
+                        Update(70, () => titleTable.AddRow($"[green bold]Verified Table Exists....[/]"));
+                    else
+                        Update(70, () => titleTable.AddRow($"[red bold]Table DOES NOT Exists....[/]"));
+
+                    sqlCommand.CommandText = procs;
+                    recs = sqlCommand.ExecuteScalar();
+
+                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 3 Stored Procedures Exist...[/]"));
+                    if (recs.ToString() == "3")
+                        Update(70, () => titleTable.AddRow($"[green bold]Verified {recs} Stored Procedures Exist...[/]"));
+                    else
+                        Update(70, () => titleTable.AddRow($"[red bold]The THREE Stored Procedures DO NOT Exists, Count {recs}....[/]"));
+
                 }
                 catch (Exception ex)
                 {
@@ -76,14 +110,23 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                 }
                 finally
                 {
-                    Update(70, () => titleTable.AddRow($"[green bold] Cleaning up...[/]"));
-                    if (conn.State == System.Data.ConnectionState.Open)
+                    Update(70, () => titleTable.AddRow($"[yellow bold]Cleaning up...[/]"));
+                    if (conn.State ==
+                    ConnectionState.Open)
                         await conn.CloseAsync();
                     await conn.DisposeAsync();
                 }
 
-                Update(70, () => titleTable.AddRow("[green bold] Database Connection Test Complete[/]"));
+                Update(70, () => titleTable.AddRow("[blue bold]Database Connection Test Complete[/]"));
             });
         return 0;
     }
+
+    /*
+        public override ValidationResult Validate(CommandContext context, BaseCommandSettings settings)
+        {
+            return base.Validate(context, settings);
+        }
+    */
 }
+

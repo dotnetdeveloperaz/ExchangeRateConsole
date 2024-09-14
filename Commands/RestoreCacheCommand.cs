@@ -5,6 +5,7 @@ using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Models;
+using ExchangeRateConsole.Commands.Settings;
 
 namespace ExchangeRateConsole.Commands;
 

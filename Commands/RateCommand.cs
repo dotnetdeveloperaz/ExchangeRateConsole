@@ -5,6 +5,7 @@ using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Models;
+using ExchangeRateConsole.Commands.Settings;
 
 namespace ExchangeRateConsole.Commands;
 
@@ -24,7 +25,6 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        settings.GetRate = true;
         var url = _config.BaseUrl;
 
         url += _config.History;
@@ -134,9 +134,23 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                 {
                     Update(
                        70,
-                       () => table.AddRow($"[red bold]     Caching Data[/]")
+                       () => table.AddRow($"[green bold]     Caching Data[/]")
                    );
-                    Utility.CacheData(exchanges, "ExchangeRate.cache");
+                    Utility.CacheData(exchanges, _config.CacheFile);
+                }
+                else
+                {
+                    Update(
+                        70,
+                        () => table.AddRow($"[green bold]     Saving Data To Database[/]")
+                    );
+                    if (await Utility.SaveRatesAsync(exchanges, _connectionString))
+                        Update(70, () => table.AddRow($"[green]Saved Exchange Rates[/]"));
+                    else
+                    {
+                        Update(70, () => table.AddRow($"[red bold]Unable To Save Exchanged Rates, Caching Data."));
+                        Utility.CacheData(exchanges, _config.CacheFile);
+                    }
                 }
                 foreach (Exchange exchange in exchanges)
                 { 

@@ -69,6 +69,48 @@ public class Utility
         return exchangeRates;
     }
 
+    public static async Task<List<ExchangeRate>> GetExchangeRates(string startDate, string endDate, string symbols, string baseSymbol, string connectionString)
+    {
+        List<ExchangeRate> exchanges = new();
+        MySqlConnection sqlConnection = new(connectionString);
+        MySqlCommand sqlCommand = new("usp_GetExchangeRates", sqlConnection);
+        sqlCommand.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            int cnt = 0;
+            await sqlConnection.OpenAsync();
+            sqlCommand.Parameters.AddWithValue("startDate", startDate);
+            sqlCommand.Parameters.AddWithValue("endDate", endDate);
+            sqlCommand.Parameters.AddWithValue("symbols", symbols);
+            sqlCommand.Parameters.AddWithValue("baseCurrency", baseSymbol);
+            var reader = sqlCommand.ExecuteReader();
+            while (reader.Read())
+            {
+                exchanges.Add(new ExchangeRate
+                {
+                    Symbol = reader["Symbol"].ToString(),
+                    Rate = double.Parse(reader["Rate"].ToString()),
+                    RateDate = DateTime.Parse(reader["RateDate"].ToString()),
+                });
+                cnt++;
+            }
+            reader.Close();
+            reader.Dispose();
+        }
+        catch (Exception ex)
+        {
+            using (StreamWriter sw = new("error.log"))
+                sw.WriteLine(ex.Message);
+        }
+        finally
+        {
+            await sqlConnection.CloseAsync();
+            sqlCommand.Dispose();
+            sqlConnection.Dispose();
+        }
+        return exchanges;
+    }
+
     public static async Task<bool> SaveRateAsync(Exchange ExchangeRate, string ConnectionString)
     {
         var rates = ExchangeRate.rates;

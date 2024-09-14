@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Spectre.Console.Cli;
 
-namespace ExchangeRateConsole.Commands
+namespace ExchangeRateConsole.Commands.Settings
 {
     public class BaseCommandSettings : CommandSettings
     {

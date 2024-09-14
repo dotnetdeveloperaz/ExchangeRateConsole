@@ -19,6 +19,7 @@ public class ApiServer
     public string Latest { get; set; }
     public string Usage { get; set; }
     public string CacheFile { get; set; }
+    public bool CacheFileExists {get; set; }
 }
 
 public class ConnectionStrings
