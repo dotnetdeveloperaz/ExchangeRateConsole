@@ -70,23 +70,27 @@ dotnet run acct
 ```
 You should see something similar to:
 ```
-╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                  Retrieving Account Information                                  │
-├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ ⏳ Calling API To Get Account Details...                                                         │
-│ ✔ Retrieved Account Details...                                                                  │
-│     Plan: Free                                                                                   │
-│     Specify Base Symbols: False                                                                  │
-│     Symbols: False                                                                               │
-│     TimeSeries: False                                                                            │
-│     Convert: False                                                                               │
-│     Quota: 1000 requests / month                                                                 │
-│     Requests Made: 176                                                                           │
-│     Remaining: 824                                                                               │
-│     Days Elapsed: 14                                                                             │
-│     Days Remaining: 17                                                                           │
-│     Daily Average: 12                                                                            │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                  Exchange Rate Console v3.0                                  │
+│                                   Written By Scott Glasgow                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                Retrieving Account Information                                │
+├──────────────────────────────────────────────────────────────────────────────────────────────┤
+│  Calling API To Get Account Details...                                                       │
+│ Retrieved Account Details...                                                                 │
+│     Plan: Free                                                                               │
+│     Specify Base Symbols: False                                                              │
+│     Symbols: False                                                                           │
+│     TimeSeries: False                                                                        │
+│     Convert: False                                                                           │
+│     Quota: 1000 requests / month                                                             │
+│     Requests Made: 84                                                                        │
+│     Remaining: 916                                                                           │
+│     Days Elapsed: 14                                                                         │
+│     Days Remaining: 17                                                                       │
+│     Daily Average: 6                                                                         │
+╰──────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 To test your database connection string, you can run the following:
 ```
