@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace ExchangeRateConsole.Models;
 
@@ -18,6 +18,7 @@ public class ApiServer
     public string History { get; set; }
     public string Latest { get; set; }
     public string Usage { get; set; }
+    public string CacheFile { get; set; }
 }
 
 public class ConnectionStrings
@@ -35,6 +36,6 @@ public class LogLevel
     public string Default { get; set; }
     public string Microsoft { get; set; }
 
-    [JsonPropertyAttribute("Microsoft.Hosting.Lifetime")]
+    [JsonPropertyName("Microsoft.Hosting.Lifetime")]
     public string MicrosoftHostingLifetime { get; set; }
 }

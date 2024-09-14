@@ -5,63 +5,38 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
-		<Version>2.1</Version>
+		<Version>3.0</Version>
 		<UserSecretsId>b378d9cd-2817-4513-a75f-1e91724e3131</UserSecretsId>
         <PublishAot>false</PublishAot>
 	</PropertyGroup>
 
-	<!-- .NET 6 -->
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="6.0.0" />
-	</ItemGroup>
-	<!-- .NET 7 -->
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="7.0.0" />
-	</ItemGroup>
-
 	<!-- .NET 8 -->
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0-preview.1.23110.8" />
-		<PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="8.0.0-preview.1.23110.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.EventSource" Version="8.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.4" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="MySqlConnector" Version="2.2.5" />
-		<PackageReference Include="NewtonSoft.Json" Version="13.0.3" />
-		<PackageReference Include="Polly" Version="7.2.3" />
-		<PackageReference Include="PublicHoliday" Version="2.27.0" />
-		<PackageReference Include="Spectre.Console" Version="0.46.0" />
-		<PackageReference Include="Spectre.Console.Cli" Version="0.46.0" />
+	  <Compile Remove="Commands\GetRate.cs" />
+	  <Compile Remove="Commands\Range.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="MySqlConnector" Version="2.3.7" />
+		<PackageReference Include="Polly" Version="8.4.1" />
+		<PackageReference Include="PublicHoliday" Version="2.39.0" />
+		<PackageReference Include="Spectre.Console" Version="0.49.1" />
+		<PackageReference Include="Spectre.Console.Cli" Version="0.49.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include=".github\workflows\dotnet6.yml" />
-		<None Include=".github\workflows\dotnet7.yml" />
 		<None Include=".github\workflows\dotnet8.yml" />
 		<None Include="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -71,6 +46,9 @@
 		</None>
 		<None Include="MultiDayRate.sample">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Account.sample">
+	    	<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 </Project>

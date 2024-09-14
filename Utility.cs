@@ -1,6 +1,6 @@
 using System.Data;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json;
 using MySqlConnector;
 using PublicHoliday;
 using ExchangeRateConsole.Models;
@@ -9,44 +9,23 @@ namespace ExchangeRateConsole;
 
 public class Utility
 {
-    private static List<DateTime> listOfDays;
-    private static List<Exchange> exchangeRates;
-
-    public List<DateTime> ListOfDays
+    public static List<DateTime> GetNumberOfDays(string startDate, string endDate)
     {
-        get { return listOfDays; }
-    }
-
-    public List<Exchange> ExchangeRates
-    {
-        get { return exchangeRates; }
-    }
-
-    public static int GetNumberOfDays(DateTime start, DateTime end)
-    {
-        listOfDays = new List<DateTime>();
-        int i = 0;
-        var res = DateTime.Compare(end, DateTime.Now);
+        List<DateTime> dates = new();
+        DateTime start = DateTime.Parse(startDate);
+        DateTime end = DateTime.Parse(endDate);
 
         while (start <= end)
         {
-            bool isHoliday = new USAPublicHoliday().IsPublicHoliday(start);
-            if (
-                !isHoliday
-                && start.DayOfWeek != DayOfWeek.Saturday
-                && start.DayOfWeek != DayOfWeek.Sunday
-            )
-
-                i++;
-            listOfDays.Add(start);
+            if (!IsHolidayOrWeekend(start))
+                dates.Add(start);
             start = start.AddDays(1);
         }
-        return i;
+        return dates;
     }
 
-    public static bool IsHolidayOrWeekend(string Date)
+    public static bool IsHolidayOrWeekend(DateTime date)
     {
-        DateTime date = DateTime.Parse(Date);
         bool isHoliday = new USAPublicHoliday().IsPublicHoliday(date);
         if (isHoliday || date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
             return true;
@@ -54,21 +33,20 @@ public class Utility
             return false;
     }
 
-    public static Exchange GetExchangeRate(string Uri, bool Save, string ConnectionString)
+    public static async Task<Exchange> GetExchangeRateAsync(string Uri, bool Save, string ConnectionString)
     {
         var client = new HttpClient();
-        var response = client.GetAsync(Uri).GetAwaiter().GetResult();
-        var info = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        var exchangeRate = JsonConvert.DeserializeObject<Exchange>(info);
+        var response = await client.GetAsync(Uri);
+        var info = await response.Content.ReadAsStringAsync();
+        var exchangeRate = JsonSerializer.Deserialize<Exchange>(info);
 
-        // Need to add save functionality.
-        if(Save)
-            SaveRate(exchangeRate, ConnectionString);
+        if (Save)
+            await SaveRateAsync(exchangeRate, ConnectionString);
 
         return exchangeRate;
     }
 
-    public static List<Exchange> GetExchangeRates(
+    public static async Task<List<Exchange>> GetExchangeRatesAsync(
         string Uri,
         string StartDate,
         string EndDate,
@@ -79,19 +57,19 @@ public class Utility
         DateTime startDate = DateTime.Parse(StartDate);
         DateTime endDate = DateTime.Parse(EndDate);
 
-        exchangeRates = new List<Exchange>();
+        List<Exchange> exchangeRates = new List<Exchange>();
         while (startDate <= endDate)
         {
             var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
-            if(!IsHolidayOrWeekend(startDate.ToString("yyyy-MM-dd")))
-                exchangeRates.Add(GetExchangeRate(url, Save, ConnectionString));
+            if(!IsHolidayOrWeekend(startDate))
+                exchangeRates.Add(await GetExchangeRateAsync(url, Save, ConnectionString));
             startDate = startDate.AddDays(1);
         }
 
         return exchangeRates;
     }
 
-    public static void SaveRate(Exchange ExchangeRate, string ConnectionString)
+    public static async Task<bool> SaveRateAsync(Exchange ExchangeRate, string ConnectionString)
     {
         var rates = ExchangeRate.rates;
 
@@ -109,23 +87,16 @@ public class Utility
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 try
                 {
-                    sqlConnection.Open();
+                    await sqlConnection.OpenAsync();
                     sqlCommand.Parameters.AddWithValue("symbol", Symbol);
                     sqlCommand.Parameters.AddWithValue("baseSymbol", BaseSymbol);
                     sqlCommand.Parameters.AddWithValue("rate", Rate);
                     sqlCommand.Parameters.AddWithValue("ratedate", RateDate);
-                    var recs = sqlCommand.ExecuteNonQuery();
+                    var recs = await sqlCommand.ExecuteNonQueryAsync();
                 }
                 catch (MySqlException)
                 {
-                    //Console.WriteLine($"Exception: {ex.Message}");
-                    /// TODO
-                    // We need to load cache file then rewrite it with new data.
-                    // This currently is in an incorrect format for restore.
-
-                    string result = JsonConvert.SerializeObject(ExchangeRate, Formatting.Indented);
-                    File.AppendAllText($"ExchangeRate.cache", result);
-                    return;
+                    return false;
                 }
                 finally
                 {
@@ -136,5 +107,38 @@ public class Utility
                 }
             }
         }
+        return true;
     }
+
+    public static async Task<bool> SaveRatesAsync(List<Exchange> exchanges, string ConnectionString)
+    {
+        int cnt = 0;
+        foreach (Exchange exchange in exchanges)
+        {
+            if ( await SaveRateAsync(exchange, ConnectionString))
+                cnt++;
+        }
+        return (cnt == exchanges.Count);
+    }
+    public static bool CacheData(List<Exchange> exchanges, string cacheFile)
+    {
+        string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string file = Path.Combine(path, cacheFile);
+        if (File.Exists(file))
+        {
+            var json = File.ReadAllText(file);
+            List<Exchange> cache = JsonSerializer.Deserialize<List<Exchange>>(json);
+            foreach (var exchange in exchanges)
+                cache.Add(exchange);
+            string result = JsonSerializer.Serialize(cache);
+            File.WriteAllText(file, result);
+        }
+        else
+        {
+            string result = JsonSerializer.Serialize(exchanges);
+            File.WriteAllText(file, result);
+        }
+        return true;
+    }
+
 }

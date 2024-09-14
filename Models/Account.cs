@@ -1,44 +1,62 @@
-using System;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace ExchangeRateConsole
 {
     public class Account
     {
-        public int status { get; set; }
-        public Data data { get; set; }
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
+        [JsonPropertyName("data")]
+        public Data Data { get; set; }
     }
     public class Features
     {
-        public bool @base { get; set; }
-        public bool symbols { get; set; }
-        public bool experimental { get; set; }
-
-        [JsonProperty("time-series")]
+        [JsonPropertyName("@base")]
+        public bool @Base { get; set; }
+        [JsonPropertyName("symbols")]
+        public bool Symbols { get; set; }
+        [JsonPropertyName("experimental")]
+        public bool Experimental { get; set; }
+        [JsonPropertyName("time-series")]
         public bool TimeSeries { get; set; }
-        public bool convert { get; set; }
+        [JsonPropertyName("convert")]
+        public bool Convert { get; set; }
     }
     public class Plan
     {
-        public string name { get; set; }
-        public string quota { get; set; }
-        public string update_frequency { get; set; }
-        public Features features { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+        [JsonPropertyName("quota")]
+        public string Quota { get; set; }
+        [JsonPropertyName("update_frequency")]
+        public string UpdateFrequency { get; set; }
+        [JsonPropertyName("features")]
+        public Features Features { get; set; }
     }
     public class Usage
     {
-        public int requests { get; set; }
-        public int requests_quota { get; set; }
-        public int requests_remaining { get; set; }
-        public int days_elapsed { get; set; }
-        public int days_remaining { get; set; }
-        public int daily_average { get; set; }
+        [JsonPropertyName("requests")]
+        public int Requests { get; set; }
+        [JsonPropertyName("requests_quota")]
+        public int RequestsQuota { get; set; }
+        [JsonPropertyName("requests_remaining")]
+        public int RequestsRemaining { get; set; }
+        [JsonPropertyName("days_elapsed")]
+        public int DaysElapsed { get; set; }
+        [JsonPropertyName("days_remaining")]
+        public int DaysRemaining { get; set; }
+        [JsonPropertyName("daily_average")]
+        public int DailyAverage { get; set; }
     }
     public class Data
     {
-        public string app_id { get; set; }
-        public string status { get; set; }
-        public Plan plan { get; set; }
-        public Usage usage { get; set; }
+        [JsonPropertyName("app_id")]
+        public string AppId { get; set; }
+        [JsonPropertyName("status")]
+        public string Status { get; set; }
+        [JsonPropertyName("plan")]
+        public Plan Plan { get; set; }
+        [JsonPropertyName("usage")]
+        public Usage Usage { get; set; }
     }
 }

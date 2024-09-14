@@ -13,20 +13,14 @@ public class CommandApplication
         {
             config
                 .AddCommand<RestoreCacheCommand>("restore")
-                .WithDescription("Restores cache from failed completion");
+                .WithDescription("Restores Cache From Failed Or Saved Completion");
             config
-                .AddCommand<AccountCommand>("account")
-                .WithDescription("Gets account information.");
-
-            config
-                .AddCommand<RangeCommand>("range")
-                .WithDescription(
-                    "Gets historical Exchange rate(s). Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
-                )
+                .AddCommand<RateCommand>("rate")
+                .WithDescription("Get Exchange Rates")
                 .WithExample(
                     new[]
                     {
-                        "range",
+                        "rate",
                         "--start",
                         "YYYY-MM-DD",
                         "--end",
@@ -36,33 +30,29 @@ public class CommandApplication
                         "--base",
                         "USD",
                         "--debug",
-                        "--hidden"
+                        "--hidden",
+                        "--save",
+                        "--cache",
+                        "--fake",
+                        "--appid",
+                        "<AppId>"
                     }
                 );
 
             config
-                .AddCommand<GetRateCommand>("getrate")
-                .WithDescription(
-                    "Gets the current Exchange rate(s). Use --save to save to database. Weekends and holidays are skipped."
-                )
-                .WithExample(
-                    new[] { "getrate", "--symbols", "EUR,TRY", "--base", "USD", "--date", "YYYY-MM-DD", "--save", "--debug", "--hidden" }
-                );
-
-            config
-                .AddCommand<AccountCommand>("acct")
+                .AddCommand<AccountCommand>("account")
+                .WithAlias("acct")
                 .WithDescription("Gets Account Statistics.")
-                .WithExample(new[] { "acct", "--debug", "--hidden" });
-
-            config
-                .AddCommand<StatusCommand>("status")
-                .WithDescription("Gets WebApi Status.")
-                .WithExample(new[] { "status", "--debug", "--hidden" });
+                .WithExample(new[] { "account", "--debug", "--hidden", "--appid", "<AppId>" });
 
             config
                 .AddCommand<TestDatabaseCommand>("testdb")
                 .WithDescription("Tests The Database Configuration.")
                 .WithExample(new[] { "testdb", "--debug", "--hidden" });
+            config
+                .AddCommand<SymbolCommand>("symbol")
+                .WithDescription("List Or Search Currency Symbols")
+                .WithExample(new[] { "symbol", "--search", "<USD>,<EUR>", "--list" });
 #if DEBUG
             config.PropagateExceptions();
             config.ValidateExamples();
