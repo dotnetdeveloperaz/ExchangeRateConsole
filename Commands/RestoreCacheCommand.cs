@@ -116,7 +116,7 @@ public class RestoreCacheCommand : AsyncCommand<RestoreCacheCommand.Settings>
                     }
                 }
                 Update(70, () => titleTable.AddRow("[red bold]Cleaning Up Cache[/]"));
-                File.Delete(file);
+                //File.Delete(file);
 
                 Update(70, () => titleTable.AddRow("[green bold]Cache Cleared[/]"));
                 Update(70, () => titleTable.Columns[0].Footer($"[green bold]Restore Process Complete[/]"));

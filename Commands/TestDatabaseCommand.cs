@@ -37,9 +37,9 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                 return 0;
 
         }
-        // Database connection string is being overriden, we displayed DEBUG info (if selected), now update the connectionstring used.
+        // Database connection string is being overridden, we displayed DEBUG info (if selected), now update the connectionstring used.
         // Setting this BEFORE DebugDisplay would cause both to have the same values, so it must come after.
-        _defaultDB = settings.DBConnectionString ?? _defaultDB;
+        settings.DBConnectionString = settings.DBConnectionString ?? _defaultDB;
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);

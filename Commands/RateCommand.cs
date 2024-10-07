@@ -148,7 +148,7 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                         Update(70, () => table.AddRow($"[green]Saved Exchange Rates[/]"));
                     else
                     {
-                        Update(70, () => table.AddRow($"[red bold]Unable To Save Exchanged Rates, Caching Data."));
+                        Update(70, () => table.AddRow($"[red bold]Unable To Save Exchanged Rates, Caching Data.[/]"));
                         Utility.CacheData(exchanges, _config.CacheFile);
                     }
                 }
