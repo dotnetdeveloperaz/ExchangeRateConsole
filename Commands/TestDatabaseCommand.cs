@@ -74,6 +74,8 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                 Update(70, () => titleTable.AddRow($"[blue bold]Testing Connection...[/]"));
                 var conn = new MySqlConnection(settings.DBConnectionString);
                 var sqlCommand = new MySqlCommand();
+                var csb = new MySqlConnectionStringBuilder(settings.DBConnectionString);
+                var user = "'" + csb.UserID + "'" + "@" + "'" + csb.Server + "'";
                 sqlCommand.Connection = conn;
                 sqlCommand.CommandType = CommandType.Text;
                 try
@@ -85,6 +87,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     string procs = "SELECT COUNT(ROUTINE_NAME) FROM information_schema.ROUTINES WHERE ROUTINE_NAME = 'usp_AddExchangeRate' "
                         + "OR ROUTINE_NAME LIKE 'usp_GetExchangeRates%';";
                     string table = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'ExchangeRates';";
+                    string exec = $"select COUNT(*) from information_schema.schema_Privileges where GRANTEE = \"" + user + "\" and PRIVILEGE_TYPE = 'EXECUTE';";
 
                     Update(70, () => titleTable.AddRow($"[blue bold]Verifying Table Exists...[/]"));
                     sqlCommand.CommandText = table;
@@ -94,14 +97,23 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     else
                         Update(70, () => titleTable.AddRow($"[red bold]Table DOES NOT Exists....[/]"));
 
+                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 3 Stored Procedures Exist...[/]"));
                     sqlCommand.CommandText = procs;
                     recs = sqlCommand.ExecuteScalar();
 
-                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 3 Stored Procedures Exist...[/]"));
                     if (recs.ToString() == "3")
                         Update(70, () => titleTable.AddRow($"[green bold]Verified {recs} Stored Procedures Exist...[/]"));
                     else
                         Update(70, () => titleTable.AddRow($"[red bold]The THREE Stored Procedures DO NOT Exists, Count {recs}....[/]"));
+
+                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying User {user} Has Execute Permissions....[/]"));
+                    sqlCommand.CommandText = exec;
+                    recs = sqlCommand.ExecuteScalar();
+
+                    if(recs.ToString() == "1")
+                        Update(70, () => titleTable.AddRow($"[green bold]Verified User {user} Has Execute Permissions...[/]"));
+                    else
+                        Update(70, () => titleTable.AddRow($"[red bold]The User {user} Does NOT have EXECUTE Permissions, Count {recs}....[/]"));
 
                 }
                 catch (Exception ex)
