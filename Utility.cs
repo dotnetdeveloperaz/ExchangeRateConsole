@@ -71,13 +71,12 @@ public class Utility
 
     public static async Task<List<ExchangeRate>> GetExchangeRates(string startDate, string endDate, string symbols, string baseSymbol, string connectionString)
     {
-        List<ExchangeRate> exchanges = new();
+        List<ExchangeRate> exchanges = [];
         MySqlConnection sqlConnection = new(connectionString);
         MySqlCommand sqlCommand = new("usp_GetExchangeRates", sqlConnection);
         sqlCommand.CommandType = CommandType.StoredProcedure;
         try
         {
-            int cnt = 0;
             await sqlConnection.OpenAsync();
             sqlCommand.Parameters.AddWithValue("startDate", startDate);
             sqlCommand.Parameters.AddWithValue("endDate", endDate);
@@ -92,7 +91,6 @@ public class Utility
                     Rate = double.Parse(reader["Rate"].ToString()),
                     RateDate = DateTime.Parse(reader["RateDate"].ToString()),
                 });
-                cnt++;
             }
             reader.Close();
             reader.Dispose();

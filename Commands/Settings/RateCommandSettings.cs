@@ -25,6 +25,11 @@ namespace ExchangeRateConsole.Commands.Settings
         [DefaultValue("")]
         public string EndDate { get; set; }
 
+        [CommandOption("--save")]
+        [Description("Saves Data To Database Or CacheFile")]
+        [DefaultValue(false)]
+        public bool Save { get; set;}
+
         [CommandOption("--base <Symbol>")]
         [Description("Base Symbol To Use To Convert From")]
         [DefaultValue("USD")]
@@ -38,15 +43,5 @@ namespace ExchangeRateConsole.Commands.Settings
         [Description("Cache Results To File")]
         [DefaultValue(false)]
         public bool Cache { get; set; }
-
-        [CommandOption("--cachefile")]
-        [Description("Cache File to Use - Override Default")]
-        [DefaultValue(null)]
-        public string CacheFile { get; set; } = null;        
-        
-        [CommandOption("--save")]
-        [Description("Save Results")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
     }
 }
