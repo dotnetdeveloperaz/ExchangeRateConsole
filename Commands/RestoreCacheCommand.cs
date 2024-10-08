@@ -115,10 +115,16 @@ public class RestoreCacheCommand : AsyncCommand<RestoreCacheCommand.Settings>
                         }
                     }
                 }
-                Update(70, () => titleTable.AddRow("[red bold]Cleaning Up Cache[/]"));
-                //File.Delete(file);
+                Update(70, () => titleTable.AddRow($"[green bold]Saving Rates To Database.....[/]"));
+                if (await Utility.SaveRatesAsync(exchanges, _connectionString))
+                {
+                    Update(70, () => titleTable.AddRow($"[green bold]Cache Saved To Database.[/]"));
+                    Update(70, () => titleTable.AddRow("[red bold]Cleaning Up Cache[/]"));
+                    File.Delete(file);
 
-                Update(70, () => titleTable.AddRow("[green bold]Cache Cleared[/]"));
+                }
+                else
+                    Update(70, () => titleTable.AddRow($"[red bold]Save To Database Failed.[/]"));
                 Update(70, () => titleTable.Columns[0].Footer($"[green bold]Restore Process Complete[/]"));
             });
         return 0;
