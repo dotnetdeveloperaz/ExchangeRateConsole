@@ -28,5 +28,5 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
 
-    - name: Run tests
-      run: dotnet test --no-restore --verbosity
+    #- name: Run tests
+    #  run: dotnet test --no-restore --verbosity

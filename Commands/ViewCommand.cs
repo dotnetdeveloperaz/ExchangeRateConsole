@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
+﻿using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using ExchangeRateConsole;
 using ExchangeRateConsole.Commands.Settings;
 using ExchangeRateConsole.Models;
 using Spectre.Console;
@@ -56,12 +47,12 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
         int removeSize = 10;
         if (_apiServer.CacheFileExists)
             removeSize += 2;
-        // Prompting if date range was not specified or is more than 180 days, although still much I think.
+        // Prompting if date range was not specified or is more than 180 days.
         if (startDate.AddDays(180) < endDate)
         {
             removeSize += 2;
             if (!AnsiConsole.Confirm("[red bold italic]The amount of data that could be returned might be too much.\n" 
-                + "You might want to specify a shorter date range. Are you sure?[/] Continue?", false)
+                + "You might want to specify a shorter date range. Are you sure you want to?[/] Continue?", false)
                 )
                 return 1;
         }
@@ -137,7 +128,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                 {
                     Update(70, () => table.AddRow($"[blue bold]Retrieving Exchange Rates Data From Database From {settings.StartDate} to {settings.EndDate}[/]"));
                     exchanges = await Utility.GetExchangeRates(settings.StartDate, settings.EndDate, settings.Symbols, settings.BaseSymbol, _defaultDB);
-                    Update(70, () => table.AddRow($"[green bold]Retrieved {exchanges.Count} Exchange Rates[/]"));
+                    Update(70, () => table.Columns[0].Footer($"[blue bold]Retrieved {exchanges.Count} Exchange Rates[/]"));
                 }
                 if (exchanges == null)
                 {
