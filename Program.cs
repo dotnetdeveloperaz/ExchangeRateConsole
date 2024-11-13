@@ -49,6 +49,7 @@ class Program
             CacheFileExists = File.Exists(file), 
             History = config.GetSection("History").Value, 
             Latest = config.GetSection("Latest").Value,
+            MaxViewCount = config.GetSection("MaxViewCount").Value,
             Usage = config.GetSection("Usage").Value 
         });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });

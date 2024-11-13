@@ -23,6 +23,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
     public class Settings : RateCommandSettings
     {
         // There are no special settings for this command
+        public int MaxRecords { get; set; }
 
     }
     public override async Task<int> ExecuteAsync(CommandContext context, ViewCommand.Settings settings)
@@ -38,6 +39,10 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
         // would show a day later than what the user specifies.
         DateTime endDate = settings.EndDate == string.Empty ? DateTime.MaxValue : DateTime.Parse(settings.EndDate).AddDays(1).AddSeconds(-1);
 
+        int maxDays;
+        int.TryParse(_apiServer.MaxViewCount, out maxDays);
+        settings.MaxRecords = maxDays;
+
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
@@ -48,11 +53,13 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
         if (_apiServer.CacheFileExists)
             removeSize += 2;
         // Prompting if date range was not specified or is more than 180 days.
-        if (startDate.AddDays(180) < endDate)
+        // Maybe we should add this to configuration so that it's not hardcoded.
+        // Will need to decide if maybe have one configurable max days for view that is used for getting rates in a date range as well? Separate?
+        if (startDate.AddDays(settings.MaxRecords) < endDate)
         {
             removeSize += 2;
-            if (!AnsiConsole.Confirm("[red bold italic]The amount of data that could be returned might be too much.\n" 
-                + "You might want to specify a shorter date range. Are you sure you want to?[/] Continue?", false)
+            if (!AnsiConsole.Confirm($"[red bold]The amount of data that could be returned exceeds configured MaxViewCount[/][yellow bold] ({_apiServer.MaxViewCount})[/].\n" 
+                + "[green]\tYou might want to specify a shorter date range.[/]\n[red bold italic]Are you sure you want to Continue?[/]", false)
                 )
                 return 1;
         }
