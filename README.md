@@ -5,8 +5,8 @@
 
 ## Status
 
-.NET 8 
-[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/dotnet8.yml)
+.NET 9 
+[![build](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/ExchangeRateConsolev2/actions/workflows/build.yml)
 
 ## Buy Me A Coffee
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
@@ -27,7 +27,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-- .NET 8.
+- .NET 9. This will work under .NET 5 through .NET 9, but the project is setup for .NET 9.
 - Account with <a target="_blank" href="https://openexchangerates.org/api/">Open Exchange Rates</a> (Free accounts with 1,000 calls per month available)
 - MariaDB or MySql (optional as you can use this application without a database).
 
