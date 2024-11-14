@@ -218,7 +218,7 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
         if (!DateTime.TryParse(settings.StartDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.StartDate}");
         if (settings.EndDate == String.Empty)
-            settings.EndDate = DateTime.Now.ToString("yyyy-MM-dd");
+            settings.EndDate = settings.StartDate;
         if (!DateTime.TryParse(settings.EndDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.EndDate}");
         return base.Validate(context, settings);
