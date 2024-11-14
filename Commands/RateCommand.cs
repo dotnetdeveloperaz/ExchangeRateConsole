@@ -33,17 +33,21 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
 
         url += "?symbols="
             + settings.Symbols;
-
+/*
         if (settings.OverrideAppId == String.Empty)
             url += $"&app_id={_config.AppId}";
         else
             url += $"&app_id={settings.OverrideAppId}";
+*/
+        url += "%app_id=" + settings.OverrideAppId ?? _config.AppId;
 
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _config, _connectionString, url))
                 return 0;
         }
+
+
         string symbols = settings.Symbols == null ? "All Symbols" : settings.Symbols;
         var table = new Table().Centered();
         // Borders
