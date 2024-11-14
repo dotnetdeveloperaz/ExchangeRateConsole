@@ -8,17 +8,11 @@ using Spectre.Console.Cli;
 
 namespace ExchangeRateConsole.Commands;
 
-public class ViewCommand : AsyncCommand<ViewCommand.Settings>
+public class ViewCommand(ApiServer apiServer, ConnectionStrings connectionStrings) : AsyncCommand<ViewCommand.Settings>
 {
-    private readonly ConnectionStrings _connectionStrings;
-    private readonly ApiServer _apiServer;
+    private readonly ConnectionStrings _connectionStrings = connectionStrings;
+    private readonly ApiServer _apiServer = apiServer;
     private string _defaultDB;
-
-    public ViewCommand(ApiServer apiServer, ConnectionStrings connectionStrings)
-    {
-        _apiServer = apiServer;
-        _connectionStrings = connectionStrings;
-    }
 
     public class Settings : RateCommandSettings
     {
@@ -39,8 +33,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
         // would show a day later than what the user specifies.
         DateTime endDate = settings.EndDate == string.Empty ? DateTime.MaxValue : DateTime.Parse(settings.EndDate).AddDays(1).AddSeconds(-1);
 
-        int maxDays;
-        int.TryParse(_apiServer.MaxViewCount, out maxDays);
+        _ = int.TryParse(_apiServer.MaxViewCount, out int maxDays);
         settings.MaxRecords = maxDays;
 
         if (settings.Debug)
@@ -69,7 +62,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
         table.HideHeaders();
         table.BorderColor(Color.Yellow);
         table.Border(TableBorder.Rounded);
-        table.AddColumns(new[] { "" });
+        table.AddColumns([""]);
         table.Expand();
 
         // Animate
@@ -100,7 +93,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
 
                     Update(70, () => table.AddRow($"[yellow]Loading Cache File From [/][green]{settings.CacheFile}[/]"));
                     string cache;
-                    using (StreamReader sr = new StreamReader(settings.CacheFile))
+                    using (StreamReader sr = new(settings.CacheFile))
                     {
                         cache = sr.ReadToEnd();
                     }

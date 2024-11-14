@@ -8,10 +8,9 @@ public class CommandApplication
 {
     public static CommandApp Initialize(CommandApp app)
     {
-        // Configure Spectre Cli
-        //var app = new CommandApp();
         app.Configure(config =>
         {
+            /*
             config
                 .AddCommand<RangeCommand>("range")
                 .WithDescription(
@@ -35,32 +34,34 @@ public class CommandApplication
                         "--hidden",
                         "--save",
                         "--cache",
-                        "--fake",
-                        "--appid",
-                        "<AppId>"
+                        "--fake"
                     }
                 );
-
+            */
             config
                 .AddCommand<RateCommand>("rate")
                 .WithDescription(
                     "Gets the current Exchange rate(s). Use --save to save to database. Weekends and holidays are skipped."
                 )
                 .WithExample(
-                    new[] 
-                    { 
-                        "rate", 
-                        "--symbols", 
-                        "EUR,TRY", 
-                        "--base", 
-                        "USD", 
-                        "--date", 
-                        "YYYY-MM-DD", 
-                        "--save", 
-                        "--appid", 
-                        "AppID", 
-                        "--debug", 
-                        "--hidden" 
+                    new[]
+                    {
+                        "rate",
+                        "--start",
+                        "YYYY-MM-DD",
+                        "--end",
+                        "YYYY-MM-DD",
+                        "--symbols",
+                        "EUR,TRY",
+                        "--base",
+                        "USD",
+                        "--appid",
+                        "<AppID>",
+                        "--debug",
+                        "--hidden",
+                        "--save",
+                        "--cache",
+                        "--fake"
                     }
                 );
 
