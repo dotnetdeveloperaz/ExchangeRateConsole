@@ -39,7 +39,7 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
         else
             url += $"&app_id={settings.OverrideAppId}";
 */
-        url += "%app_id=" + settings.OverrideAppId ?? _config.AppId;
+        url += "&app_id=" + settings.OverrideAppId ?? _config.AppId;
 
         if (settings.Debug)
         {
