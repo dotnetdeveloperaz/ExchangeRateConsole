@@ -31,13 +31,13 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.GetAccount = true;
-        string url = _apiServer.BaseUrl + _apiServer.Usage + "?app_id=" + settings.OverrideAppId ?? _apiServer.AppId;
+        _apiServer.AppId = settings.OverrideAppId ?? _apiServer.AppId;
+        string url = _apiServer.BaseUrl + _apiServer.Usage + "?app_id=" + _apiServer.AppId;
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _apiServer, _connectionString, url))
                 return 0;
         }
-        _apiServer.AppId = settings.OverrideAppId ?? _apiServer.AppId;
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);

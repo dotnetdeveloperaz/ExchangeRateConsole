@@ -5,7 +5,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>disable</Nullable>
-		<Version>3.0</Version>
+		<Version>4.0</Version>
 		<UserSecretsId>b378d9cd-2817-4513-a75f-1e91724e3131</UserSecretsId>
         <PublishAot>false</PublishAot>
 	</PropertyGroup>
@@ -27,6 +27,7 @@
 	<ItemGroup>
 	  <Compile Remove="Commands\GetRate.cs" />
 	  <Compile Remove="Commands\Range.cs" />
+	  <Compile Remove="Commands\RangeCommand.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="MySqlConnector" Version="2.4.0" />

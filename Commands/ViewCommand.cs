@@ -108,7 +108,7 @@ public class ViewCommand(ApiServer apiServer, ConnectionStrings connectionString
                             var rates = rate.rates;
                             foreach (PropertyInfo prop in rates.GetType().GetProperties())
                             {
-                                if (prop.GetValue(rates).ToString() != "0")
+                                if (prop.GetValue(rates).ToString() != "0" && settings.Symbols.Contains(prop.Name))
                                 {
                                     exchanges.Add(new ExchangeRate
                                         {
@@ -135,7 +135,7 @@ public class ViewCommand(ApiServer apiServer, ConnectionStrings connectionString
                     Update(70, () => table.AddRow($"[red bold]No Rows Of Data Returned[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($"[green bold]Finished Retrieving {exchanges.Count} Rows Of Data[/]"));
+                Update(70, () => table.AddRow($"[green bold]Finished Loading {exchanges.Count} Rows Of Data[/]"));
                 int rowCnt = 0;
 
                 foreach (ExchangeRate rate in exchanges)

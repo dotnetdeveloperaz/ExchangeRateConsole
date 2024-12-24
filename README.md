@@ -1,4 +1,4 @@
-<h3 align="center">Exchange Rate Console</h3>
+<h3 align="center">Exchange Rate Console v4.0</h3>
 
 <p>Console to retrieve currency exchange rates. Free accounts do not let you specify the base currency, it is USD. This application does support the ability to pass in any base currency (if you sign up for a plan that supports it) and rate currency symbols. If no symbols are specified, it will return all currency rates against the USD (or the specified base currency).
 </p>
@@ -27,7 +27,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-- .NET 9. This will work under .NET 5 through .NET 9, but the project is setup for .NET 9.
+- .NET 9 Runtime or SDK
 - Account with <a target="_blank" href="https://openexchangerates.org/api/">Open Exchange Rates</a> (Free accounts with 1,000 calls per month available)
 - MariaDB or MySql (optional as you can use this application without a database).
 
