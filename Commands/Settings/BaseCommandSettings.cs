@@ -22,7 +22,7 @@ namespace ExchangeRateConsole.Commands.Settings
 
         [CommandOption("--appid")]
         [Description("Overrides The AppId")]
-        [DefaultValue("")]
+        [DefaultValue(null)]
         public string OverrideAppId { get; set; } 
 
         [CommandOption("--cachefile")]
