@@ -50,6 +50,7 @@ class Program
             History = config.GetSection("History").Value, 
             Latest = config.GetSection("Latest").Value,
             MaxViewCount = config.GetSection("MaxViewCount").Value,
+            HistoricalStartDate = config.GetSection("HistoricalStartDate").Value,
             Usage = config.GetSection("Usage").Value 
         });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });

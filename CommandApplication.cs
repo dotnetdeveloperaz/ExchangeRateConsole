@@ -95,6 +95,11 @@ public class CommandApplication
                  );
 
             config
+                .AddCommand<MissingCommand>("missing")
+                .WithDescription("Reports the dates that have missing rate data for the specified currency symbol.")
+                .WithExample(new[] { "missing", "--symbol", "USD", "--start", "YYYY-MM-DD", "--end", "YYYY-MM-DD", "--debug", "--hidden" });
+
+            config
                 .AddCommand<CacheStatsCommand>("cachestats")
                 .WithAlias("cstats")
                 .WithDescription(
