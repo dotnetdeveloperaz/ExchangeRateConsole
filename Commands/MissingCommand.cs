@@ -15,8 +15,7 @@ public class MissingCommand(ApiServer apiServer, ConnectionStrings ConnectionStr
 {
     private readonly string _connectionString = ConnectionString.DefaultDB;
     private readonly ApiServer _apiServer = apiServer;
-    private string metal;
-    private string metalName;
+
     private static readonly string[] columns = new[] { "" };
 
     public class Settings : BaseCommandSettings
