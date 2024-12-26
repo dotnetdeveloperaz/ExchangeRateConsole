@@ -2,8 +2,9 @@ using System.ComponentModel;
 using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using ExchangeRateConsole.Models;
 using System.Reflection;
+using ExchangeRateConsole.Models;
+using ExchangeRateConsole.Commands.Settings;
 
 namespace ExchangeRateConsole.Commands;
 
@@ -30,13 +31,13 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.GetAccount = true;
+        _apiServer.AppId = settings.OverrideAppId ?? _apiServer.AppId;
         string url = _apiServer.BaseUrl + _apiServer.Usage + "?app_id=" + _apiServer.AppId;
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _apiServer, _connectionString, url))
                 return 0;
         }
-
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);

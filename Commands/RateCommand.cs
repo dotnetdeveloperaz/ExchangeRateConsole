@@ -5,6 +5,7 @@ using System.Text.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using ExchangeRateConsole.Models;
+using ExchangeRateConsole.Commands.Settings;
 
 namespace ExchangeRateConsole.Commands;
 
@@ -24,7 +25,6 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        settings.GetRate = true;
         var url = _config.BaseUrl;
 
         url += _config.History;
@@ -34,16 +34,15 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
         url += "?symbols="
             + settings.Symbols;
 
-        if (settings.OverrideAppId == String.Empty)
-            url += $"&app_id={_config.AppId}";
-        else
-            url += $"&app_id={settings.OverrideAppId}";
+        url += "&app_id=" + settings.OverrideAppId ?? _config.AppId;
 
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _config, _connectionString, url))
                 return 0;
         }
+
+
         string symbols = settings.Symbols == null ? "All Symbols" : settings.Symbols;
         var table = new Table().Centered();
         // Borders
@@ -134,9 +133,23 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
                 {
                     Update(
                        70,
-                       () => table.AddRow($"[red bold]     Caching Data[/]")
+                       () => table.AddRow($"[green bold]     Caching Data[/]")
                    );
-                    Utility.CacheData(exchanges, "ExchangeRate.cache");
+                    Utility.CacheData(exchanges, _config.CacheFile);
+                }
+                else
+                {
+                    Update(
+                        70,
+                        () => table.AddRow($"[green bold]     Saving Data To Database[/]")
+                    );
+                    if (await Utility.SaveRatesAsync(exchanges, _connectionString))
+                        Update(70, () => table.AddRow($"[green]Saved Exchange Rates[/]"));
+                    else
+                    {
+                        Update(70, () => table.AddRow($"[red bold]Unable To Save Exchanged Rates, Caching Data.[/]"));
+                        Utility.CacheData(exchanges, _config.CacheFile);
+                    }
                 }
                 foreach (Exchange exchange in exchanges)
                 { 
@@ -204,7 +217,7 @@ public class RateCommand : AsyncCommand<RateCommand.Settings>
         if (!DateTime.TryParse(settings.StartDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.StartDate}");
         if (settings.EndDate == String.Empty)
-            settings.EndDate = DateTime.Now.ToString("yyyy-MM-dd");
+            settings.EndDate = settings.StartDate;
         if (!DateTime.TryParse(settings.EndDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.EndDate}");
         return base.Validate(context, settings);

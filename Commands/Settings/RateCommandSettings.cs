@@ -6,13 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExchangeRateConsole.Commands
+namespace ExchangeRateConsole.Commands.Settings
 {
     public class RateCommandSettings : BaseCommandSettings
     {
+        [CommandOption("--date <YYYY-MM-DD>")]
         [Description("Get Rate For Specified Date")]
-        [DefaultValue(false)]
-        public bool GetRate { get; set; }
+        [DefaultValue(null)]
+        public string Date { get; set;}
 
         [CommandOption("--start <YYYY-MM-DD>")]
         [Description("Start Date")]
@@ -24,6 +25,11 @@ namespace ExchangeRateConsole.Commands
         [DefaultValue("")]
         public string EndDate { get; set; }
 
+        [CommandOption("--save")]
+        [Description("Saves Data To Database Or CacheFile")]
+        [DefaultValue(false)]
+        public bool Save { get; set;}
+
         [CommandOption("--base <Symbol>")]
         [Description("Base Symbol To Use To Convert From")]
         [DefaultValue("USD")]
@@ -32,11 +38,6 @@ namespace ExchangeRateConsole.Commands
         [CommandOption("--symbols <EUR>")]
         [Description("Exchange Rate(s) To Get")]
         public string Symbols { get; set; }
-
-        [CommandOption("--save")]
-        [Description("Save Results")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
 
         [CommandOption("--cache")]
         [Description("Cache Results To File")]

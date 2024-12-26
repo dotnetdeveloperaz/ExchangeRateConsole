@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Spectre.Console.Cli;
 
-namespace ExchangeRateConsole.Commands
+namespace ExchangeRateConsole.Commands.Settings
 {
     public class BaseCommandSettings : CommandSettings
     {
@@ -22,7 +22,12 @@ namespace ExchangeRateConsole.Commands
 
         [CommandOption("--appid")]
         [Description("Overrides The AppId")]
-        [DefaultValue("")]
-        public string OverrideAppId { get; set; }   
+        [DefaultValue(null)]
+        public string OverrideAppId { get; set; } 
+
+        [CommandOption("--cachefile")]
+        [Description("Cache File to Use - Override Default")]
+        [DefaultValue(null)]
+        public string CacheFile { get; set; } = null;  
     }
 }

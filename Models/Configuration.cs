@@ -12,13 +12,16 @@ public class Configuration
 
 public class ApiServer
 {
-    public string BaseUrl { get; set; }
     public string AppId { get; set; }
     public string BaseSymbol { get; set; }
+    public string BaseUrl { get; set; }
+    public string CacheFile { get; set; }
+    public bool CacheFileExists {get; set; }
     public string History { get; set; }
     public string Latest { get; set; }
+    public string MaxViewCount { get; set; }
+    public string HistoricalStartDate { get; set; }
     public string Usage { get; set; }
-    public string CacheFile { get; set; }
 }
 
 public class ConnectionStrings

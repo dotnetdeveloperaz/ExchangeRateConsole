@@ -1,15 +1,16 @@
 ﻿using System.ComponentModel;
-using Spectre.Console.Cli;
-using ExchangeRateConsole.Models;
-using Spectre.Console;
-using Microsoft.VisualBasic;
-using MySqlConnector;
 using System.Data;
 using System.Reflection;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using System.Text;
+using Microsoft.VisualBasic;
+using MySqlConnector;
+using Spectre.Console.Cli;
+using Spectre.Console;
+using ExchangeRateConsole.Models;
+using ExchangeRateConsole.Commands.Settings;
 
 namespace ExchangeRateConsole.Commands
 {

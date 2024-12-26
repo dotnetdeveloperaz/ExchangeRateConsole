@@ -55,10 +55,10 @@ namespace ExchangeRateConsole
                         table.AddRow($"{property.Name}", $"[yellow]{(bool)value}[/]");
                     else
                         if (value is not null)
-                        table.AddRow($"{property.Name}", $"{value}");
+                            table.AddRow($"{property.Name}", $"{value}");
                 }
                 AnsiConsole.Write(table);
-                if (AnsiConsole.Confirm("Continue?"))
+                if (AnsiConsole.Confirm("Continue?", false))
                     Title.Print();
                 else
                     return false;
