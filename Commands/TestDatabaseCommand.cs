@@ -76,6 +76,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                 var sqlCommand = new MySqlCommand();
                 var csb = new MySqlConnectionStringBuilder(settings.DBConnectionString);
                 var user = "'" + csb.UserID + "'" + "@" + "'" + csb.Server + "'";
+                var schema = csb.Database;
                 sqlCommand.Connection = conn;
                 sqlCommand.CommandType = CommandType.Text;
                 try
@@ -87,7 +88,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     string procs = "SELECT COUNT(ROUTINE_NAME) FROM information_schema.ROUTINES WHERE ROUTINE_NAME = 'usp_AddExchangeRate' "
                         + "OR ROUTINE_NAME LIKE 'usp_GetExchangeRates%';";
                     string table = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'ExchangeRates';";
-                    string exec = $"select COUNT(*) from information_schema.schema_Privileges where GRANTEE = \"" + user + "\" and PRIVILEGE_TYPE = 'EXECUTE';";
+                    string exec = $"select COUNT(*) from information_schema.schema_Privileges where TABLE_SCHEMA = '{schema}' AND GRANTEE = \"" + user + "\" and PRIVILEGE_TYPE = 'EXECUTE';";
 
                     Update(70, () => titleTable.AddRow($"[blue bold]Verifying Table Exists...[/]"));
                     sqlCommand.CommandText = table;
