@@ -7,8 +7,17 @@ using ExchangeRateConsole.Models;
 
 namespace ExchangeRateConsole;
 
+/// <summary>
+/// Contains Common Methods
+/// </summary>
 public class Utility
 {
+    /// <summary>
+    /// Get the number of days between a date range that are non-holiday weekdays.
+    /// </summary>
+    /// <param name="startDate"></param>
+    /// <param name="endDate"></param>
+    /// <returns></returns>
     public static List<DateTime> GetNumberOfDays(string startDate, string endDate)
     {
         List<DateTime> dates = new();
@@ -23,7 +32,11 @@ public class Utility
         }
         return dates;
     }
-
+    /// <summary>
+    /// Returns if a date is a weekend or holiday.
+    /// </summary>
+    /// <param name="date"></param>
+    /// <returns></returns>
     public static bool IsHolidayOrWeekend(DateTime date)
     {
         bool isHoliday = new USAPublicHoliday().IsPublicHoliday(date);
@@ -32,7 +45,13 @@ public class Utility
         else
             return false;
     }
-
+    /// <summary>
+    /// Retrieves the exchange rates from the third part API.
+    /// </summary>
+    /// <param name="Uri"></param>
+    /// <param name="Save"></param>
+    /// <param name="ConnectionString"></param>
+    /// <returns></returns>
     public static async Task<Exchange> GetExchangeRateAsync(string Uri, bool Save, string ConnectionString)
     {
         var client = new HttpClient();
@@ -45,31 +64,16 @@ public class Utility
 
         return exchangeRate;
     }
-
-    public static async Task<List<Exchange>> GetExchangeRatesAsync(
-        string Uri,
-        string StartDate,
-        string EndDate,
-        bool Save,
-        string ConnectionString
-    )
-    {
-        DateTime startDate = DateTime.Parse(StartDate);
-        DateTime endDate = DateTime.Parse(EndDate);
-
-        List<Exchange> exchangeRates = new List<Exchange>();
-        while (startDate <= endDate)
-        {
-            var url = Uri.Replace("{date}", startDate.ToString("yyyy-MM-dd"));
-            if(!IsHolidayOrWeekend(startDate))
-                exchangeRates.Add(await GetExchangeRateAsync(url, Save, ConnectionString));
-            startDate = startDate.AddDays(1);
-        }
-
-        return exchangeRates;
-    }
-
-    public static async Task<List<ExchangeRate>> GetExchangeRates(string startDate, string endDate, string symbols, string baseSymbol, string connectionString)
+/// <summary>
+/// Retrieves the exchange rates from the database
+/// </summary>
+/// <param name="startDate"></param>
+/// <param name="endDate"></param>
+/// <param name="symbols"></param>
+/// <param name="baseSymbol"></param>
+/// <param name="connectionString"></param>
+/// <returns></returns>
+    public static List<ExchangeRate> GetExchangeRates(string startDate, string endDate, string symbols, string baseSymbol, string connectionString)
     {
         List<ExchangeRate> exchanges = [];
         MySqlConnection sqlConnection = new(connectionString);
@@ -77,7 +81,7 @@ public class Utility
         sqlCommand.CommandType = CommandType.StoredProcedure;
         try
         {
-            await sqlConnection.OpenAsync();
+            sqlConnection.Open();
             sqlCommand.Parameters.AddWithValue("startDate", startDate);
             sqlCommand.Parameters.AddWithValue("endDate", endDate);
             sqlCommand.Parameters.AddWithValue("symbols", symbols);
@@ -102,13 +106,18 @@ public class Utility
         }
         finally
         {
-            await sqlConnection.CloseAsync();
+            sqlConnection.Close();
             sqlCommand.Dispose();
             sqlConnection.Dispose();
         }
         return exchanges;
     }
-
+    /// <summary>
+    /// Saves the exchange rate to the database.
+    /// </summary>
+    /// <param name="ExchangeRate"></param>
+    /// <param name="ConnectionString"></param>
+    /// <returns></returns>
     public static async Task<bool> SaveRateAsync(Exchange ExchangeRate, string ConnectionString)
     {
         var rates = ExchangeRate.rates;
@@ -149,7 +158,12 @@ public class Utility
         }
         return true;
     }
-
+    /// <summary>
+    /// Saves a list of exchange rates to the database.
+    /// </summary>
+    /// <param name="exchanges"></param>
+    /// <param name="ConnectionString"></param>
+    /// <returns></returns>
     public static async Task<bool> SaveRatesAsync(List<Exchange> exchanges, string ConnectionString)
     {
         int cnt = 0;
@@ -160,6 +174,12 @@ public class Utility
         }
         return (cnt == exchanges.Count);
     }
+    /// <summary>
+    /// Caches the data to a json file
+    /// </summary>
+    /// <param name="exchanges"></param>
+    /// <param name="cacheFile"></param>
+    /// <returns></returns>
     public static bool CacheData(List<Exchange> exchanges, string cacheFile)
     {
         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -180,5 +200,4 @@ public class Utility
         }
         return true;
     }
-
 }
