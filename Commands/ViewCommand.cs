@@ -16,7 +16,7 @@ public class ViewCommand(ApiServer apiServer, ConnectionStrings connectionString
 
     public class Settings : RateCommandSettings
     {
-        // There are no special settings for this command
+        // Command specific switches/options
         public int MaxRecords { get; set; }
 
     }
@@ -46,8 +46,6 @@ public class ViewCommand(ApiServer apiServer, ConnectionStrings connectionString
         if (_apiServer.CacheFileExists)
             removeSize += 2;
         // Prompting if date range was not specified or is more than 180 days.
-        // Maybe we should add this to configuration so that it's not hardcoded.
-        // Will need to decide if maybe have one configurable max days for view that is used for getting rates in a date range as well? Separate?
         if (startDate.AddDays(settings.MaxRecords) < endDate)
         {
             removeSize += 2;
@@ -127,15 +125,15 @@ public class ViewCommand(ApiServer apiServer, ConnectionStrings connectionString
                 else
                 {
                     Update(70, () => table.AddRow($"[blue bold]Retrieving Exchange Rates Data From Database From {settings.StartDate} to {settings.EndDate}[/]"));
-                    exchanges = await Utility.GetExchangeRates(settings.StartDate, settings.EndDate, settings.Symbols, settings.BaseSymbol, _defaultDB);
-                    Update(70, () => table.Columns[0].Footer($"[blue bold]Retrieved {exchanges.Count} Exchange Rates[/]"));
+                    exchanges = Utility.GetExchangeRates(settings.StartDate, settings.EndDate, settings.Symbols, settings.BaseSymbol, _defaultDB);
+                    Update(70, () => table.AddRow($"[blue bold]Retrieved {exchanges.Count} Exchange Rates[/]"));
                 }
                 if (exchanges == null)
                 {
                     Update(70, () => table.AddRow($"[red bold]No Rows Of Data Returned[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($"[green bold]Finished Loading {exchanges.Count} Rows Of Data[/]"));
+                Update(70, () => table.Columns[0].Footer($"[green bold]Finished Loading {exchanges.Count} Rows Of Data[/]"));
                 int rowCnt = 0;
 
                 foreach (ExchangeRate rate in exchanges)
