@@ -85,8 +85,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     Update(70, () => titleTable.AddRow($"[green bold]Connection Made Successfully...[/]"));
 
                     // Want to add tests to ensure table exists, and both stored procedures exist.
-                    string procs = "SELECT COUNT(ROUTINE_NAME) FROM information_schema.ROUTINES WHERE ROUTINE_NAME = 'usp_AddExchangeRate' "
-                        + "OR ROUTINE_NAME LIKE 'usp_GetExchangeRates%';";
+                    string procs = "SELECT COUNT(ROUTINE_NAME) FROM information_schema.ROUTINES WHERE ROUTINE_NAME = 'usp_AddExchangeRate' OR ROUTINE_NAME = 'usp_GetExchangeRates' OR ROUTINE_NAME = 'usp_GetExchangeMissing' OR ROUTINE_NAME = 'fn_isHoliday';";
                     string table = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'ExchangeRates';";
                     string exec = $"select COUNT(*) from information_schema.schema_Privileges where TABLE_SCHEMA = '{schema}' AND GRANTEE = \"" + user + "\" and PRIVILEGE_TYPE = 'EXECUTE';";
 
@@ -98,14 +97,14 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     else
                         Update(70, () => titleTable.AddRow($"[red bold]Table DOES NOT Exists....[/]"));
 
-                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 3 Stored Procedures Exist...[/]"));
+                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 3 Stored Procedures And 1 Function Exist...[/]"));
                     sqlCommand.CommandText = procs;
                     recs = sqlCommand.ExecuteScalar();
 
-                    if (recs.ToString() == "3")
-                        Update(70, () => titleTable.AddRow($"[green bold]Verified {recs} Stored Procedures Exist...[/]"));
+                    if (recs.ToString() == "4")
+                        Update(70, () => titleTable.AddRow($"[green bold]Verified {recs} Stored Procedures And Function Exist...[/]"));
                     else
-                        Update(70, () => titleTable.AddRow($"[red bold]The THREE Stored Procedures DO NOT Exists, Count {recs}....[/]"));
+                        Update(70, () => titleTable.AddRow($"[red bold]The FOUR Stored Procedures/Function DO NOT Exist, Count {recs}....[/]"));
 
                     Update(70, () => titleTable.AddRow($"[blue bold]Verifying User {user} Has Execute Permissions....[/]"));
                     sqlCommand.CommandText = exec;
