@@ -10,34 +10,6 @@ public class CommandApplication
     {
         app.Configure(config =>
         {
-            /*
-            config
-                .AddCommand<RangeCommand>("range")
-                .WithDescription(
-                    "Gets historical Exchange rate(s). Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
-                )
-                .WithExample(
-                    new[]
-                    {
-                        "rate",
-                        "--start",
-                        "YYYY-MM-DD",
-                        "--end",
-                        "YYYY-MM-DD",
-                        "--symbols",
-                        "EUR,TRY",
-                        "--base",
-                        "USD",
-                        "--appid",
-                        "<AppID>",
-                        "--debug",
-                        "--hidden",
-                        "--save",
-                        "--cache",
-                        "--fake"
-                    }
-                );
-            */
             config
                 .AddCommand<RateCommand>("rate")
                 .WithDescription(
@@ -131,6 +103,11 @@ public class CommandApplication
                 .AddCommand<StatusCommand>("status")
                 .WithDescription("Gets WebApi Status.")
                 .WithExample(new[] { "status", "--debug", "--hidden" });
+
+            config
+                .AddCommand<SymbolCommand>("symbol")
+                .WithDescription("Lists or searches valid currency symbols.")
+                .WithExample(new[] { "symbol", "--list", "--search", "<USD>" });
 
 #if DEBUG
             config.PropagateExceptions();

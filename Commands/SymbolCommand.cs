@@ -1,12 +1,7 @@
 ﻿using System.ComponentModel;
-using System.Data;
 using System.Reflection;
-using System.Diagnostics;
-using System.Globalization;
 using System.Text.Json;
 using System.Text;
-using Microsoft.VisualBasic;
-using MySqlConnector;
 using Spectre.Console.Cli;
 using Spectre.Console;
 using ExchangeRateConsole.Models;
@@ -81,7 +76,7 @@ namespace ExchangeRateConsole.Commands
                         Thread.Sleep(delay);
                     }
                     
-                    string msg = settings.Symbol == String.Empty ? "Listing Valid Currency Codes" : $"Searching For Currency Code {settings.Symbol}";
+                    string msg = settings.Symbol == String.Empty ? "Listing Valid Currency Codes" : $"Searching For Currency Codes Containing {settings.Symbol}";
                     Update(70, () => table.AddRow($"[red bold]{msg}[/]"));
                     string cache;
                     using (StreamReader sr = new StreamReader("OneDayRate.sample"))
@@ -93,7 +88,7 @@ namespace ExchangeRateConsole.Commands
 
                     foreach (PropertyInfo prop in rates.GetType().GetProperties())
                     {
-                        if (settings.ListCodes || settings.Symbol.Contains(prop.Name))
+                        if (settings.ListCodes || prop.Name.Contains(settings.Symbol))
                             Update(70, () => table.AddRow($"[green bold] {prop.Name}[/]"));
                         // More rows than we want?
                         if (table.Rows.Count > Console.WindowHeight - 15)
